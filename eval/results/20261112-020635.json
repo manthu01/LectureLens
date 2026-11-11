@@ -1,0 +1,84 @@
+[
+  {
+    "config": "dense",
+    "n": 7,
+    "recall@1": 1.0,
+    "recall@5": 1.0,
+    "mrr": 1.0,
+    "timestamp_acc": 1.0,
+    "latency_ms_median": 2078.21430000331,
+    "misses": [],
+    "top_rerank_answerable": [],
+    "top_rerank_unanswerable": []
+  },
+  {
+    "config": "bm25",
+    "n": 7,
+    "recall@1": 0.7142857142857143,
+    "recall@5": 1.0,
+    "mrr": 0.7904761904761904,
+    "timestamp_acc": 0.5714285714285714,
+    "latency_ms_median": 2048.085499998706,
+    "misses": [],
+    "top_rerank_answerable": [],
+    "top_rerank_unanswerable": []
+  },
+  {
+    "config": "hybrid",
+    "n": 7,
+    "recall@1": 0.8571428571428571,
+    "recall@5": 1.0,
+    "mrr": 0.9285714285714286,
+    "timestamp_acc": 0.8571428571428571,
+    "latency_ms_median": 2075.3699999986566,
+    "misses": [],
+    "top_rerank_answerable": [],
+    "top_rerank_unanswerable": []
+  },
+  {
+    "config": "hybrid+rerank",
+    "n": 7,
+    "recall@1": 0.8571428571428571,
+    "recall@5": 1.0,
+    "mrr": 0.9285714285714286,
+    "timestamp_acc": 0.8571428571428571,
+    "latency_ms_median": 4903.010899994115,
+    "misses": [],
+    "top_rerank_answerable": [
+      0.078,
+      0.981,
+      0.982,
+      0.982,
+      0.996,
+      0.998,
+      0.999
+    ],
+    "top_rerank_unanswerable": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "config": "hybrid+rerank, off-topic kept",
+    "n": 7,
+    "recall@1": 0.8571428571428571,
+    "recall@5": 1.0,
+    "mrr": 0.9285714285714286,
+    "timestamp_acc": 0.8571428571428571,
+    "latency_ms_median": 5039.284500002395,
+    "misses": [],
+    "top_rerank_answerable": [
+      0.078,
+      0.981,
+      0.982,
+      0.982,
+      0.996,
+      0.998,
+      0.999
+    ],
+    "top_rerank_unanswerable": [
+      0.0,
+      0.0
+    ]
+  }
+]
