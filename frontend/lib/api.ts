@@ -24,6 +24,20 @@ export type Segment = {
   text: string;
   label: "teaching" | "off_topic" | "admin" | "exam_hint";
   topic: string;
+  lecture_number: number;
+};
+
+export type Chapter = { title: string; label: Segment["label"]; start_sec: number; end_sec: number };
+export type Timeline = { chapters: Chapter[]; teaching_sec: number; total_sec: number };
+export type Summary = { summary: string; key_points: { text: string; start_sec: number }[] };
+export type QuizQuestion = {
+  question: string;
+  options: string[];
+  answer_index: number;
+  explanation: string;
+  lecture_id: number;
+  lecture_number: number;
+  start_sec: number;
 };
 
 export type Citation = {
@@ -61,7 +75,13 @@ export const listCourses = () => req<Course[]>("/courses");
 export const createCourse = (name: string, professor: string) => req<Course>("/courses", { name, professor });
 export const getCourse = (id: number) => req<CourseDetail>(`/courses/${id}`);
 export const getTranscript = (lectureId: number) => req<Segment[]>(`/lectures/${lectureId}/transcript`);
-export const retryLecture = (lectureId: number) => req<Lecture>(`/lectures/${lectureId}/retry`, {});
+export const getTimeline = (lectureId: number) => req<Timeline>(`/lectures/${lectureId}/timeline`);
+export const getSummary = (lectureId: number) => req<Summary>(`/lectures/${lectureId}/summary`);
+export const getQuiz = (courseId: number, lectureIds: number[], n: number) =>
+  req<QuizQuestion[]>(`/courses/${courseId}/quiz`, { lecture_ids: lectureIds, n });
+export const getExamHints = (courseId: number) => req<Segment[]>(`/courses/${courseId}/exam-hints`);
+export const getAnnouncements = (courseId: number) => req<Segment[]>(`/courses/${courseId}/announcements`);
+export const retryLecture =(lectureId: number) => req<Lecture>(`/lectures/${lectureId}/retry`, {});
 
 /** Adds a single video, or every video of a playlist when the URL has a list= parameter. */
 export function addSource(courseId: number, url: string, limit?: number) {

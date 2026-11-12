@@ -1,4 +1,5 @@
 from app.generation.answer import cited_indices, fmt_time
+from app.generation.derive import build_timeline, parse_quiz
 from app.ingestion.chunk import chunk_transcript
 from app.ingestion.classify import parse_labels
 
@@ -63,6 +64,46 @@ def test_parse_labels_fills_gaps_and_rejects_bad_items():
         {"label": "exam_hint", "topic": "Gradient Descent"},
     ]
     assert parse_labels(None, 2) == [{"label": "teaching", "topic": ""}] * 2
+
+
+def _seg(start, end, label="teaching", topic=""):
+    return {"start_sec": start, "end_sec": end, "label": label, "topic": topic, "lecture_id": 1, "lecture_number": 1}
+
+
+def test_timeline_merges_topics_and_counts_teaching_time():
+    segs = [
+        _seg(0, 62, "admin"),
+        _seg(60, 122, topic="Binary Search"),
+        _seg(120, 181, topic="Binary Search"),
+        _seg(180, 240, "off_topic"),
+        _seg(238, 300, "exam_hint", "Binary Search"),
+    ]
+    t = build_timeline(segs, duration_sec=310)
+    assert [(c["title"], c["start_sec"], c["end_sec"]) for c in t["chapters"]] == [
+        ("Course info", 0, 60),
+        ("Binary Search", 60, 180),
+        ("Off topic", 180, 238),
+        ("Binary Search", 238, 300),  # different label, so a separate chapter
+    ]
+    assert t["teaching_sec"] == 120 + 62
+    assert t["total_sec"] == 310
+    assert build_timeline([]) == {"chapters": [], "teaching_sec": 0, "total_sec": 0}
+
+
+def test_parse_quiz_drops_malformed_questions():
+    segs = [_seg(0, 60), _seg(60, 120)]
+    good = {"question": "Q?", "options": ["a", "b", "c", "d"], "answer_index": 2, "explanation": "e", "i": 1}
+    raw = [
+        good,
+        {**good, "options": ["a", "b"]},  # wrong option count
+        {**good, "answer_index": 4},  # out of range
+        {**good, "i": 5},  # unknown segment
+        "junk",
+    ]
+    out = parse_quiz(raw, segs)
+    assert len(out) == 1
+    assert out[0]["start_sec"] == 60 and out[0]["answer_index"] == 2
+    assert parse_quiz({"not": "a list"}, segs) == []
 
 
 def test_fmt_time():

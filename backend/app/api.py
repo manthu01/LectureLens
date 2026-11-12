@@ -1,9 +1,12 @@
+import json
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session, func, select
 
 from app.db import Course, Lecture, get_session
+from app.generation import derive
 from app.generation.answer import answer_stream
 from app.ingestion.acquire import list_playlist
 from app.ingestion.pipeline import run_ingest
@@ -33,6 +36,11 @@ class PlaylistIn(BaseModel):
 class AskIn(BaseModel):
     question: str
     include_off_topic: bool = False
+
+
+class QuizIn(BaseModel):
+    lecture_ids: list[int]
+    n: int = 5
 
 
 class SearchIn(BaseModel):
@@ -146,6 +154,48 @@ def retry_lecture(lecture_id: int, tasks: BackgroundTasks, session: Session = De
 def get_transcript(lecture_id: int, session: Session = Depends(get_session)) -> list[dict]:
     _get(session, Lecture, lecture_id)
     return store.lecture_segments(lecture_id)
+
+
+@router.get("/lectures/{lecture_id}/timeline")
+def get_timeline(lecture_id: int, session: Session = Depends(get_session)) -> dict:
+    lecture = _get(session, Lecture, lecture_id)
+    return derive.build_timeline(store.lecture_segments(lecture_id), lecture.duration_sec)
+
+
+@router.get("/lectures/{lecture_id}/summary")
+def get_summary(lecture_id: int, session: Session = Depends(get_session)) -> dict:
+    """Cached summary; generated on first request for lectures indexed before summaries existed."""
+    lecture = _get(session, Lecture, lecture_id)
+    if lecture.summary:
+        return json.loads(lecture.summary)
+    if lecture.status != "indexed":
+        raise HTTPException(409, f"Lecture is not ready ({lecture.status})")
+    try:
+        summary = derive.summarize(store.lecture_segments(lecture_id))
+    except Exception as e:
+        raise HTTPException(502, f"Could not generate summary: {str(e)[:300]}")
+    lecture.summary = json.dumps(summary, ensure_ascii=False)
+    session.add(lecture)
+    session.commit()
+    return summary
+
+
+@router.post("/courses/{course_id}/quiz")
+def quiz(course_id: int, body: QuizIn, session: Session = Depends(get_session)) -> list[dict]:
+    """Multiple-choice questions from the teaching segments of the chosen lectures."""
+    _get(session, Course, course_id)
+    segments = []
+    for lecture_id in body.lecture_ids:
+        lecture = _get(session, Lecture, lecture_id)
+        if lecture.course_id != course_id:
+            raise HTTPException(422, f"Lecture {lecture_id} is not in this course")
+        segments += store.lecture_segments(lecture_id)
+    if not segments:
+        raise HTTPException(409, "The chosen lectures have no indexed content yet")
+    try:
+        return derive.make_quiz(segments, max(1, min(body.n, 15)))
+    except Exception as e:
+        raise HTTPException(502, f"Could not generate quiz: {str(e)[:300]}")
 
 
 @router.post("/courses/{course_id}/search")

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from sqlalchemy import inspect, text
 from sqlmodel import Field, Session, SQLModel, create_engine
 
 from app.config import settings
@@ -28,6 +29,7 @@ class Lecture(SQLModel, table=True):
     # queued | downloading | transcribing | indexing | indexed | failed
     status: str = "queued"
     error: str = ""
+    summary: str = ""  # JSON: {summary, key_points: [{text, start_sec}]}
     created_at: datetime = Field(default_factory=_now)
 
 
@@ -38,6 +40,10 @@ engine = create_engine(settings.db_url, connect_args=_connect_args)
 def init_db() -> None:
     settings.data_path.mkdir(parents=True, exist_ok=True)
     SQLModel.metadata.create_all(engine)
+    # create_all never alters existing tables, so add columns introduced after the first release.
+    with engine.begin() as conn:
+        if "summary" not in {c["name"] for c in inspect(conn).get_columns("lecture")}:
+            conn.execute(text("ALTER TABLE lecture ADD COLUMN summary TEXT NOT NULL DEFAULT ''"))
 
 
 def get_session():

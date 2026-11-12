@@ -9,11 +9,14 @@ import {
   type CourseDetail,
   fmtTime,
   getCourse,
+  getTimeline,
   getTranscript,
   type Lecture,
   retryLecture,
   type Segment,
+  type Timeline,
 } from "@/lib/api";
+import { CourseNotes, QuizPanel, SummaryPanel, TimelineBar } from "@/components/lecture-panels";
 
 const STATUS_STYLE: Record<Lecture["status"], string> = {
   queued: "text-muted",
@@ -39,6 +42,8 @@ export default function CourseView() {
   // What the player shows. `nonce` forces a reload so clicking the same timestamp twice still seeks.
   const [current, setCurrent] = useState<{ lectureId: number; start: number; nonce: number } | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
+  const [timeline, setTimeline] = useState<{ lectureId: number; data: Timeline } | null>(null);
+  const [tab, setTab] = useState<"transcript" | "summary" | "quiz">("transcript");
   const [url, setUrl] = useState("");
   const [limit, setLimit] = useState("");
   const [adding, setAdding] = useState(false);
@@ -75,6 +80,9 @@ export default function CourseView() {
     getTranscript(lectureId)
       .then((s) => !stale && setSegments(s))
       .catch(() => !stale && setSegments([]));
+    getTimeline(lectureId)
+      .then((data) => !stale && setTimeline({ lectureId, data }))
+      .catch(() => {});
     return () => {
       stale = true;
     };
@@ -112,7 +120,12 @@ export default function CourseView() {
         </Link>
         <h1 className="font-semibold">{course.name}</h1>
         {course.professor && <span className="text-sm text-muted">{course.professor}</span>}
-        {error && <span className="ml-auto text-sm text-red-500">{error}</span>}
+        {lecture && (
+          <button onClick={() => setCurrent(null)} className="text-sm text-accent hover:underline">
+            Exam hints & announcements
+          </button>
+        )}
+        {error &&<span className="ml-auto text-sm text-red-500">{error}</span>}
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_400px]">
@@ -168,7 +181,7 @@ export default function CourseView() {
         {/* Player + transcript */}
         <section className="flex min-h-0 flex-col border-b border-line lg:border-b-0 lg:border-r">
           {!lecture ? (
-            <p className="p-6 text-sm text-muted">Pick a lecture, or ask a question and click a timestamp.</p>
+            <CourseNotes courseId={courseId} onSeek={seek} />
           ) : (
             <>
               <div className="aspect-video w-full shrink-0 bg-black lg:max-h-[55vh]">
@@ -187,10 +200,43 @@ export default function CourseView() {
                   </p>
                 )}
               </div>
-              <div className="border-b border-line px-4 py-2 text-sm font-medium">
-                {lecture.number}. {lecture.title}
+              {lectureIndexed && timeline?.lectureId === lecture.id && (
+                <TimelineBar
+                  timeline={timeline.data}
+                  position={current!.start}
+                  onSeek={(start) => seek(lecture.id, start)}
+                />
+              )}
+              <div className="flex items-center gap-4 border-b border-line px-4 py-2 text-sm">
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {lecture.number}. {lecture.title}
+                </span>
+                {lectureIndexed &&
+                  (["transcript", "summary", "quiz"] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTab(t)}
+                      className={`capitalize ${tab === t ? "font-medium text-accent" : "text-muted hover:text-foreground"}`}
+                    >
+                      {t}
+                    </button>
+                  ))}
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto p-2 text-sm">
+              {lectureIndexed && tab === "summary" && (
+                <div className="min-h-0 flex-1 overflow-y-auto text-sm">
+                  <SummaryPanel lectureId={lecture.id} onSeek={(start) => seek(lecture.id, start)} />
+                </div>
+              )}
+              {lectureIndexed && tab === "quiz" && (
+                <div className="min-h-0 flex-1 overflow-y-auto text-sm">
+                  <QuizPanel key={lecture.id} courseId={courseId} lectureId={lecture.id} onSeek={seek} />
+                </div>
+              )}
+              <div
+                className={`min-h-0 flex-1 overflow-y-auto p-2 text-sm ${
+                  lectureIndexed && tab !== "transcript" ? "hidden" : ""
+                }`}
+              >
                 {lecture.status === "failed" && (
                   <div className="p-2">
                     <p className="text-red-500">Processing failed: {lecture.error}</p>

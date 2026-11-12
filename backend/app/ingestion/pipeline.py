@@ -1,3 +1,4 @@
+import json
 import logging
 import threading
 
@@ -5,6 +6,7 @@ from sqlmodel import Session, select
 
 from app.config import settings
 from app.db import Lecture, engine
+from app.generation import derive
 from app.ingestion.acquire import download_audio
 from app.ingestion.chunk import chunk_transcript
 from app.ingestion.classify import classify_chunks
@@ -69,6 +71,10 @@ def run_ingest(lecture_id: int) -> None:
             if n == 0:
                 raise RuntimeError("No speech found in this video")
             _set(session, lecture, status="indexed")
+            try:  # nice-to-have; the summary endpoint retries on demand if this fails
+                _set(session, lecture, summary=json.dumps(derive.summarize(chunks), ensure_ascii=False))
+            except Exception:
+                log.warning("Summary generation failed for lecture %s", lecture_id, exc_info=True)
         except Exception as e:  # surface the reason in the UI and allow retry
             log.exception("Ingest failed for lecture %s", lecture_id)
             session.rollback()
