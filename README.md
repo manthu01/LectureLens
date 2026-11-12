@@ -4,7 +4,7 @@
 
 > Status: work in progress. Search, cited answers, summaries, topic timelines and quizzes work. Reading slides or the board from the video is not built yet.
 
-**Live demo:** https://lecturelens-roan.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures; the first request after a quiet spell takes a few extra seconds while the backend starts).
+**Live demo:** https://lecturelens-app.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures; the first request after a quiet spell takes a few extra seconds while the backend starts).
 
 ## What it does
 
