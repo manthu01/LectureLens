@@ -55,6 +55,7 @@ export default function Home() {
             >
               <span className="font-medium">{c.name}</span>
               {c.professor && <span className="ml-2 text-sm text-muted">{c.professor}</span>}
+              {c.description && <span className="mt-1 block text-sm text-muted">{c.description}</span>}
             </Link>
           </li>
         ))}

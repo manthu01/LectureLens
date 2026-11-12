@@ -227,7 +227,15 @@ function NoteList({ title, empty, items, onSeek }: { title: string; empty: strin
 }
 
 /** Course-wide exam hints and announcements, shown when no lecture is open. */
-export function CourseNotes({ courseId, onSeek }: { courseId: number; onSeek: Seek }) {
+export function CourseNotes({
+  courseId,
+  description,
+  onSeek,
+}: {
+  courseId: number;
+  description: string;
+  onSeek: Seek;
+}) {
   const [notes, setNotes] = useState<{ hints: Segment[]; announcements: Segment[] } | null>(null);
 
   useEffect(() => {
@@ -242,6 +250,7 @@ export function CourseNotes({ courseId, onSeek }: { courseId: number; onSeek: Se
 
   return (
     <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-6 text-sm">
+      {description && <p className="rounded-lg border border-line bg-panel px-4 py-3 leading-relaxed">{description}</p>}
       <p className="text-muted">Pick a lecture on the left, or ask a question and click a timestamp.</p>
       {notes && (
         <>

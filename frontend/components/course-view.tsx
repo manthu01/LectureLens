@@ -190,7 +190,7 @@ export default function CourseView() {
         {/* Player + transcript */}
         <section className="flex min-h-0 flex-col border-b border-line lg:border-b-0 lg:border-r">
           {!lecture ? (
-            <CourseNotes courseId={courseId} onSeek={seek} />
+            <CourseNotes courseId={courseId} description={course.description} onSeek={seek} />
           ) : (
             <>
               <div className="aspect-video w-full shrink-0 bg-black lg:max-h-[55vh]">
