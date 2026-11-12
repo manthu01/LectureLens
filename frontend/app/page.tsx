@@ -11,12 +11,13 @@ export default function Home() {
   const [professor, setProfessor] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const [readOnly, setReadOnly] = useState(false);
+  // null = not known yet; keep the create form hidden until the backend says otherwise.
+  const [readOnly, setReadOnly] = useState<boolean | null>(null);
 
   useEffect(() => {
     getConfig()
       .then((c) => setReadOnly(c.read_only))
-      .catch(() => {});
+      .catch(() => setReadOnly(false));
     listCourses()
       .then(setCourses)
       .catch(() => setError("Could not reach the backend at localhost:8000. Is it running?"));
@@ -63,7 +64,7 @@ export default function Home() {
         {!courses && !error && <li className="text-sm text-muted">Loading…</li>}
       </ul>
 
-      <form onSubmit={submit} className={`mt-8 flex flex-col gap-2 sm:flex-row ${readOnly ? "hidden" : ""}`}>
+      <form onSubmit={submit} className={`mt-8 flex flex-col gap-2 sm:flex-row ${readOnly !== false ? "hidden" : ""}`}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}

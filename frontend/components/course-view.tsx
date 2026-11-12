@@ -65,11 +65,12 @@ export default function CourseView() {
   }, [refresh]);
 
   // The public demo is read-only: hide the controls for adding lectures.
-  const [readOnly, setReadOnly] = useState(false);
+  // null = not known yet; keep them hidden until the backend says otherwise.
+  const [readOnly, setReadOnly] = useState<boolean | null>(null);
   useEffect(() => {
     getConfig()
       .then((c) => setReadOnly(c.read_only))
-      .catch(() => {});
+      .catch(() => setReadOnly(false));
   }, []);
 
   // Poll while anything is still processing.
@@ -161,7 +162,7 @@ export default function CourseView() {
             ))}
             {course.lectures.length === 0 && <li className="p-3 text-sm text-muted">No lectures yet.</li>}
           </ul>
-          <form onSubmit={add} className={`space-y-2 border-t border-line p-3 ${readOnly ? "hidden" : ""}`}>
+          <form onSubmit={add} className={`space-y-2 border-t border-line p-3 ${readOnly !== false ? "hidden" : ""}`}>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
