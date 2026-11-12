@@ -2,7 +2,9 @@
 
 **Ctrl+F for your entire semester of lectures.** Ask a question, get an answer grounded only in what was taught, and jump to the exact second the lecturer explained it.
 
-> Status: work in progress. Search, cited answers, summaries, topic timelines and quizzes work. Reading slides or the board from the video is not built yet, and there is no public demo link yet.
+> Status: work in progress. Search, cited answers, summaries, topic timelines and quizzes work. Reading slides or the board from the video is not built yet.
+
+**Live demo:** https://lecturelens-roan.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures; the first request after a quiet spell takes a few extra seconds while the backend starts).
 
 ## What it does
 
@@ -78,6 +80,13 @@ docker run -p 7860:7860 -e GEMINI_API_KEY=... -e LLM_MODEL=... lecturelens-api
 ```
 
 The image sets `READ_ONLY=true` and limits each visitor to 10 LLM-backed requests per minute (`RATE_LIMIT_PER_MIN`). It uses about 700 MB of RAM, so it needs a host with at least 1 GB. Set `CORS_ORIGINS` on the backend to the frontend's URL, and `NEXT_PUBLIC_API_URL` on the frontend to the backend's URL.
+
+The live demo runs both halves on Vercel. `scripts/build_space.py` writes `deploy/space/` with a `Dockerfile.vercel`, which Vercel builds as a container:
+
+```bash
+uv run python scripts/build_space.py
+cd ../deploy/space && vercel link --project lecturelens-api && vercel deploy --prod
+```
 
 ## Evaluation
 

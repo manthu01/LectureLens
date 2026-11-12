@@ -48,6 +48,8 @@ def main() -> None:
     shutil.copytree(BACKEND / "app", OUT / "app", ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copytree(snapshot, OUT / "snapshot", ignore=shutil.ignore_patterns(".lock"))
     (OUT / "README.md").write_text(SPACE_README, encoding="utf-8")
+    # Vercel builds a container image when it finds Dockerfile.vercel at the project root.
+    shutil.copy2(BACKEND / "Dockerfile", OUT / "Dockerfile.vercel")
     files = sum(1 for p in OUT.rglob("*") if p.is_file())
     size = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
     print(f"Space bundle ready at {OUT}: {files} files, {size / 1024:.0f} KB")
