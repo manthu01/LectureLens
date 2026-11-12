@@ -112,7 +112,7 @@ This compares dense, BM25, hybrid and hybrid + rerank retrieval and reports Reca
 
 What this shows so far:
 
-- Hybrid retrieval beats either retriever alone at rank 1. BM25 on its own struggles because the transcripts are machine translations with misspelt terms.
+- Hybrid retrieval beats either retriever alone at rank 1. BM25 on its own is weakest, possibly because the transcripts are machine translations with misspelt terms (not yet checked).
 - The reranker gets the right passage into the top 5 every time, but costs rank-1 accuracy here and makes search about 11x slower. It needs a closer look before it earns its place.
 - Filtering off-topic segments changes nothing on this set, as almost no questions target off-topic talk.
 - Refusals: 9 of the 11 uncovered questions score near 0 with the reranker. Two near misses score high ("bias-variance trade-off" 0.80, "deploying with Flask" 0.52) because lecture 1 lists them as upcoming topics, so for these the refusal relies on the LLM rather than the score threshold.
