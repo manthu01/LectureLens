@@ -39,8 +39,14 @@ def search(api: str, course: int, question: str, cfg: dict) -> list[dict]:
         data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=120) as res:
-        return json.loads(res.read())
+    for attempt in range(3):  # a deployed backend can drop the odd connection on a long run
+        try:
+            with urllib.request.urlopen(req, timeout=120) as res:
+                return json.loads(res.read())
+        except (ConnectionError, urllib.error.URLError):
+            if attempt == 2:
+                raise
+            time.sleep(2 * (attempt + 1))
 
 
 def is_hit(hit: dict, q: dict) -> bool:
