@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { type Course, createCourse, listCourses } from "@/lib/api";
+import { type Course, createCourse, getConfig, listCourses } from "@/lib/api";
 
 export default function Home() {
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -11,7 +11,12 @@ export default function Home() {
   const [professor, setProfessor] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [readOnly, setReadOnly] = useState(false);
+
   useEffect(() => {
+    getConfig()
+      .then((c) => setReadOnly(c.read_only))
+      .catch(() => {});
     listCourses()
       .then(setCourses)
       .catch(() => setError("Could not reach the backend at localhost:8000. Is it running?"));
@@ -57,7 +62,7 @@ export default function Home() {
         {!courses && !error && <li className="text-sm text-muted">Loading…</li>}
       </ul>
 
-      <form onSubmit={submit} className="mt-8 flex flex-col gap-2 sm:flex-row">
+      <form onSubmit={submit} className={`mt-8 flex flex-col gap-2 sm:flex-row ${readOnly ? "hidden" : ""}`}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}

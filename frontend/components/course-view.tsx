@@ -8,6 +8,7 @@ import {
   addSource,
   type CourseDetail,
   fmtTime,
+  getConfig,
   getCourse,
   getTimeline,
   getTranscript,
@@ -62,6 +63,14 @@ export default function CourseView() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // The public demo is read-only: hide the controls for adding lectures.
+  const [readOnly, setReadOnly] = useState(false);
+  useEffect(() => {
+    getConfig()
+      .then((c) => setReadOnly(c.read_only))
+      .catch(() => {});
+  }, []);
 
   // Poll while anything is still processing.
   const processing = course?.lectures.some(isBusy) ?? false;
@@ -152,7 +161,7 @@ export default function CourseView() {
             ))}
             {course.lectures.length === 0 && <li className="p-3 text-sm text-muted">No lectures yet.</li>}
           </ul>
-          <form onSubmit={add} className="space-y-2 border-t border-line p-3">
+          <form onSubmit={add} className={`space-y-2 border-t border-line p-3 ${readOnly ? "hidden" : ""}`}>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}

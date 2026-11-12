@@ -2,20 +2,25 @@
 name = "lecturelens-backend"
 version = "0.1.0"
 requires-python = ">=3.11"
+# Everything the deployed, read-only API needs (search + answers).
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "sqlmodel",
     "pydantic-settings",
-    "yt-dlp",
-    "faster-whisper",
     "fastembed",
     "qdrant-client",
     "google-genai",
 ]
 
 [dependency-groups]
+# Needed only to add lectures (download + transcription). Installed by default locally,
+# left out of the Docker image with `uv sync --no-default-groups`.
+ingest = ["yt-dlp", "faster-whisper"]
 dev = ["pytest"]
+
+[tool.uv]
+default-groups = ["ingest", "dev"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     reranker_model: str = "Xenova/ms-marco-MiniLM-L-12-v2"  # empty = no reranking
     # Refuse without calling the LLM when the best rerank score (0..1) is below this. 0 disables the gate.
     rerank_threshold: float = 0.01
+    # Public demo mode: adding/retrying lectures is disabled; search, answers, summaries, quizzes still work.
+    read_only: bool = False
+    # Max LLM-backed requests (ask, quiz) per client IP per minute. 0 = unlimited.
+    rate_limit_per_min: int = 0
     classify_segments: bool = True  # label segments teaching/off_topic/admin/exam_hint at ingest
 
     @property

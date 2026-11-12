@@ -47,9 +47,11 @@ def collection_exists() -> bool:
 
 
 def _ensure_collection(dim: int) -> None:
-    client = _client()
-    if client.collection_exists(COLLECTION):
-        return
+    if not _client().collection_exists(COLLECTION):
+        create_collection(_client(), dim)
+
+
+def create_collection(client: QdrantClient, dim: int) -> None:
     client.create_collection(
         COLLECTION,
         vectors_config={"dense": models.VectorParams(size=dim, distance=models.Distance.COSINE)},

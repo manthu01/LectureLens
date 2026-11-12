@@ -16,7 +16,8 @@ logging.basicConfig(level=logging.INFO)
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
-    threading.Thread(target=resume_unfinished, daemon=True).start()
+    if not settings.read_only:
+        threading.Thread(target=resume_unfinished, daemon=True).start()
     yield
 
 

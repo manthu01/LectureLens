@@ -8,3 +8,4 @@ node_modules/
 .next/
 .vercel/
 GEMINI_API_KEY.txt
+backend/snapshot/

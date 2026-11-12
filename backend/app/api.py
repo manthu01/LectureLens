@@ -1,10 +1,13 @@
 import json
+import time
+from collections import defaultdict, deque
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session, func, select
 
+from app.config import settings
 from app.db import Course, Lecture, get_session
 from app.generation import derive
 from app.generation.answer import answer_stream
@@ -51,6 +54,35 @@ class SearchIn(BaseModel):
     include_off_topic: bool = False
 
 
+def writable() -> None:
+    """Dependency for endpoints that add or reprocess lectures."""
+    if settings.read_only:
+        raise HTTPException(403, "This is a read-only demo; adding lectures is disabled.")
+
+
+_recent: dict[str, deque] = defaultdict(deque)
+
+
+def rate_limited(request: Request) -> None:
+    """Dependency for endpoints that spend LLM calls: a per-IP sliding one-minute window."""
+    limit = settings.rate_limit_per_min
+    if not limit:
+        return
+    forwarded = request.headers.get("x-forwarded-for", "")
+    ip = forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    now, hits = time.monotonic(), _recent[ip]
+    while hits and now - hits[0] > 60:
+        hits.popleft()
+    if len(hits) >= limit:
+        raise HTTPException(429, "Too many requests. Please wait a minute and try again.")
+    hits.append(now)
+
+
+@router.get("/config")
+def config() -> dict:
+    return {"read_only": settings.read_only}
+
+
 def _get(session: Session, model, id_: int):
     obj = session.get(model, id_)
     if obj is None:
@@ -58,7 +90,7 @@ def _get(session: Session, model, id_: int):
     return obj
 
 
-@router.post("/courses")
+@router.post("/courses", dependencies=[Depends(writable)])
 def create_course(body: CourseIn, session: Session = Depends(get_session)) -> Course:
     course = Course(**body.model_dump())
     session.add(course)
@@ -79,7 +111,7 @@ def get_course(course_id: int, session: Session = Depends(get_session)) -> dict:
     return {**course.model_dump(), "lectures": list(lectures)}
 
 
-@router.post("/courses/{course_id}/lectures")
+@router.post("/courses/{course_id}/lectures", dependencies=[Depends(writable)])
 def add_lecture(
     course_id: int, body: LectureIn, tasks: BackgroundTasks, session: Session = Depends(get_session)
 ) -> Lecture:
@@ -96,7 +128,7 @@ def add_lecture(
     return lecture
 
 
-@router.post("/courses/{course_id}/playlist")
+@router.post("/courses/{course_id}/playlist", dependencies=[Depends(writable)])
 def add_playlist(
     course_id: int, body: PlaylistIn, tasks: BackgroundTasks, session: Session = Depends(get_session)
 ) -> list[Lecture]:
@@ -136,7 +168,7 @@ def get_lecture(lecture_id: int, session: Session = Depends(get_session)) -> Lec
     return _get(session, Lecture, lecture_id)
 
 
-@router.post("/lectures/{lecture_id}/retry")
+@router.post("/lectures/{lecture_id}/retry", dependencies=[Depends(writable)])
 def retry_lecture(lecture_id: int, tasks: BackgroundTasks, session: Session = Depends(get_session)) -> Lecture:
     """Re-run ingestion for a failed lecture, or re-index a finished one (cached steps are reused)."""
     lecture = _get(session, Lecture, lecture_id)
@@ -180,7 +212,7 @@ def get_summary(lecture_id: int, session: Session = Depends(get_session)) -> dic
     return summary
 
 
-@router.post("/courses/{course_id}/quiz")
+@router.post("/courses/{course_id}/quiz", dependencies=[Depends(rate_limited)])
 def quiz(course_id: int, body: QuizIn, session: Session = Depends(get_session)) -> list[dict]:
     """Multiple-choice questions from the teaching segments of the chosen lectures."""
     _get(session, Course, course_id)
@@ -227,7 +259,7 @@ def announcements(course_id: int, session: Session = Depends(get_session)) -> li
     return store.course_segments_by_label(course_id, "admin")
 
 
-@router.post("/courses/{course_id}/ask")
+@router.post("/courses/{course_id}/ask", dependencies=[Depends(rate_limited)])
 def ask(course_id: int, body: AskIn, session: Session = Depends(get_session)) -> StreamingResponse:
     _get(session, Course, course_id)
     question = body.question.strip()

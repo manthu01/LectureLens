@@ -1,8 +1,11 @@
+"""Fetching lecture media. yt-dlp and PyAV are imported lazily: the deployed, read-only
+backend does not install the ingestion dependencies."""
+
 from pathlib import Path
 
-import yt_dlp
-
 from app.config import settings
+
+_JS_RUNTIMES = {"deno": {}, "node": {}}
 
 
 def _local_duration(path: Path) -> float:
@@ -14,12 +17,9 @@ def _local_duration(path: Path) -> float:
 
 def list_playlist(url: str, limit: int | None = None) -> list[dict]:
     """Return [{url, title, video_id, duration_sec}] for the videos in a playlist, in order."""
-    opts = {
-        "extract_flat": "in_playlist",
-        "quiet": True,
-        "no_warnings": True,
-        "js_runtimes": {"deno": {}, "node": {}},
-    }
+    import yt_dlp
+
+    opts = {"extract_flat": "in_playlist", "quiet": True, "no_warnings": True, "js_runtimes": _JS_RUNTIMES}
     if limit:
         opts["playlistend"] = limit
     with yt_dlp.YoutubeDL(opts) as ydl:
@@ -51,6 +51,8 @@ def download_audio(source: str, out_dir: Path) -> dict:
             "video_id": "",
         }
 
+    import yt_dlp
+
     out_dir.mkdir(parents=True, exist_ok=True)
     existing = [p for p in out_dir.glob("audio.*") if p.suffix not in (".part", ".ytdl")]
     opts = {
@@ -59,7 +61,7 @@ def download_audio(source: str, out_dir: Path) -> dict:
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
-        "js_runtimes": {"deno": {}, "node": {}},
+        "js_runtimes": _JS_RUNTIMES,
     }
     if settings.ytdlp_cookies_from_browser:
         opts["cookiesfrombrowser"] = (settings.ytdlp_cookies_from_browser,)

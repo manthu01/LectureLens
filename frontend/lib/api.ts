@@ -71,7 +71,8 @@ async function req<T>(path: string, body?: unknown): Promise<T> {
   return res.json();
 }
 
-export const listCourses = () => req<Course[]>("/courses");
+export const getConfig = () => req<{ read_only: boolean }>("/config");
+export const listCourses =() => req<Course[]>("/courses");
 export const createCourse = (name: string, professor: string) => req<Course>("/courses", { name, professor });
 export const getCourse = (id: number) => req<CourseDetail>(`/courses/${id}`);
 export const getTranscript = (lectureId: number) => req<Segment[]>(`/lectures/${lectureId}/transcript`);
@@ -110,7 +111,13 @@ export async function ask(
   } catch {
     return on.error("Could not reach the backend. Is it running?");
   }
-  if (!res.ok || !res.body) return on.error(`Request failed (${res.status})`);
+  if (!res.ok || !res.body) {
+    const detail = await res
+      .json()
+      .then((j) => (typeof j.detail === "string" ? j.detail : ""))
+      .catch(() => "");
+    return on.error(detail || `Request failed (${res.status})`);
+  }
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();

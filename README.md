@@ -2,7 +2,7 @@
 
 **Ctrl+F for your entire semester of lectures.** Ask a question, get an answer grounded only in what was taught, and jump to the exact second the lecturer explained it.
 
-> Status: work in progress. Weeks 1–2 of the [build plan](LECTURE_SEARCH_PROJECT.md) are done. The visual pipeline (slides/board), summaries, quizzes and deployment are not built yet.
+> Status: work in progress. Search, cited answers, summaries, topic timelines and quizzes work. Reading slides or the board from the video is not built yet, and there is no public demo link yet.
 
 ## What it does
 
@@ -11,6 +11,8 @@
 - **Labels every segment** as teaching, off-topic, admin or exam hint, and names its topic.
 - **Answers questions with citations.** Each claim links to a lecture and timestamp; clicking it seeks the video.
 - **Refuses when the lectures don't cover it**, and shows the closest moments instead of guessing.
+- **Summarises each lecture** with timestamped key points and a clickable topic timeline that greys out off-topic stretches.
+- **Generates practice quizzes** from a lecture's own content, each question linked to the moment it was explained.
 
 ### Why not just ask a chatbot?
 
@@ -63,6 +65,19 @@ npm run dev
 ```
 
 Open http://localhost:3000, create a course, and paste a YouTube video or playlist URL. Lectures are processed one at a time; on a laptop CPU, expect several minutes per lecture. If the backend restarts, unfinished lectures resume automatically.
+
+## Deploying a public demo
+
+Transcription is too heavy for free hosting, so the demo is **read-only**: lectures are processed locally, then a snapshot of the index is baked into the backend image. Visitors can search, ask, read summaries and take quizzes, but cannot add lectures.
+
+```bash
+cd backend
+uv run python scripts/make_snapshot.py     # stop the backend first; writes backend/snapshot/
+docker build -t lecturelens-api .
+docker run -p 7860:7860 -e GEMINI_API_KEY=... -e LLM_MODEL=... lecturelens-api
+```
+
+The image sets `READ_ONLY=true` and limits each visitor to 10 LLM-backed requests per minute (`RATE_LIMIT_PER_MIN`). It uses about 700 MB of RAM, so it needs a host with at least 1 GB. Set `CORS_ORIGINS` on the backend to the frontend's URL, and `NEXT_PUBLIC_API_URL` on the frontend to the backend's URL.
 
 ## Evaluation
 

@@ -956,38 +956,43 @@ wheels = [
 name = "lecturelens-backend"
 version = "0.1.0"
 source = { virtual = "." }
+default-groups = ["dev", "ingest"]
 dependencies = [
     { name = "fastapi" },
     { name = "fastembed" },
-    { name = "faster-whisper" },
     { name = "google-genai" },
     { name = "pydantic-settings" },
     { name = "qdrant-client" },
     { name = "sqlmodel" },
     { name = "uvicorn", extra = ["standard"] },
-    { name = "yt-dlp" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
 ]
+ingest = [
+    { name = "faster-whisper" },
+    { name = "yt-dlp" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "fastapi" },
     { name = "fastembed" },
-    { name = "faster-whisper" },
     { name = "google-genai" },
     { name = "pydantic-settings" },
     { name = "qdrant-client" },
     { name = "sqlmodel" },
     { name = "uvicorn", extras = ["standard"] },
-    { name = "yt-dlp" },
 ]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest" }]
+ingest = [
+    { name = "faster-whisper" },
+    { name = "yt-dlp" },
+]
 
 [[package]]
 name = "loguru"
