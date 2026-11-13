@@ -394,31 +394,47 @@ Plan: start with one course you know well (~20 lectures), screen-only first; the
 
 ## 14. Build Plan (≈4 weeks part-time)
 
+### Status (updated 2026-11-13)
+
+Live demo: https://lecturelens-app.vercel.app (5 lectures of CampusX "100 Days of Machine Learning").
+
+**Next up: answer-quality eval** (refusal rate over all 11 uncovered questions plus false refusals on the 55 answerable ones, faithfulness, correctness against gold answers, citation accuracy).
+Pending decision: which model grades the answers. Gemini is free with the existing key but grades its own output; Claude is more independent but needs an Anthropic API key in `.env`.
+
+Then: ablations (chunk size, embedding model, classifier on/off, Whisper `small` vs `medium`/`large-v3` for Hinglish translation quality) → demo video + architecture diagram → slide/board reading.
+Small fixes: the live error message still says "localhost:8000"; the demo has only 5 lectures.
+
+Recent results:
+- Retrieval (66 questions): hybrid Recall@1 0.96, Recall@5 1.00, MRR 0.98.
+- Reranker sweep (5 cross-encoders): re-sorting never beat hybrid at rank 1, so the hybrid order is kept and MiniLM-L-6 only scores hits for the refusal gate. A search takes ~0.9 s, down from ~5.6 s.
+- Refusals: 9/11 uncovered questions fall below the score threshold. The 2 near misses (bias-variance, Flask) pass it, but the LLM refuses both.
+- 57 of the 66 eval questions were checked against the transcript text only, not the videos (`"status": "skimmed"`).
+
 ### Week 1 — End-to-end skeleton
-- [ ] Repo, Docker Compose (Qdrant, Redis), FastAPI hello world
-- [ ] Download 5 lectures, extract audio, transcribe with timestamps
-- [ ] Simple chunking, embed, index in Qdrant
-- [ ] `/ask` with dense retrieval + LLM answer + timestamp citations
-- [ ] Minimal UI (Streamlit OK) with video seeking
-- [ ] Start writing eval questions as you watch
+- [x] Repo, FastAPI app (changed: no Docker Compose/Redis; Qdrant runs embedded locally and on Qdrant Cloud when deployed)
+- [x] Download 5 lectures, extract audio, transcribe with timestamps (faster-whisper `small`, translate mode for Hinglish)
+- [x] Simple chunking, embed, index in Qdrant
+- [x] `/ask` with retrieval + LLM answer + timestamp citations
+- [x] UI with video seeking (went straight to Next.js instead of Streamlit)
+- [x] Eval questions (66: 55 with gold spans, 11 the lectures don't cover)
 
 ### Week 2 — Retrieval quality + noise handling
-- [ ] Segment classification + exam hints/announcements extraction
-- [ ] BM25 + hybrid fusion + reranker
-- [ ] Off-topic filtering, refusal path with threshold
-- [ ] Eval script v1 with retrieval metrics; first baseline numbers
+- [x] Segment classification + exam hints/announcements extraction
+- [x] BM25 + hybrid fusion + reranker (the reranker scores hits for the refusal gate instead of reordering them; see the reranker sweep in `eval/results/`)
+- [x] Off-topic filtering, refusal path with threshold
+- [x] Eval script v1 with retrieval metrics; first baseline numbers
 
 ### Week 3 — Product + visuals
-- [ ] Next.js UI: course page, lecture page, timeline, chat with SSE
-- [ ] Summaries, topic timeline, "skip the fluff" stats
+- [x] Next.js UI: course page with lecture panels, timeline, chat with SSE (no separate lecture page)
+- [x] Summaries, topic timeline, "skip the fluff" stats (teaching minutes vs total)
 - [ ] Visual pipeline for screen_only + facecam_screen; alignment into segments
-- [ ] Quiz generation + checking
+- [x] Quiz generation + checking (multiple choice, checked in the UI)
 
 ### Week 4 — Rigor + polish
 - [ ] Board lectures via vision model; layout detection
-- [ ] Complete eval set (incl. unanswerable + visual-only); run all ablations
-- [ ] Deploy (live link), demo video (2 min), README with architecture diagram + results table
-- [ ] Stretch: back-of-class handling, Hinglish
+- [ ] Complete eval set (incl. unanswerable + visual-only); run all ablations. Partly done: the unanswerable questions exist, retrieval-mode and reranker ablations are done; still to do are the visual-only questions, the answer-quality eval and the remaining ablations
+- [ ] Deploy (live link), demo video (2 min), README with architecture diagram + results table. Partly done: deployed on Vercel and the README has a results table and an ASCII architecture sketch; still to do are the demo video and a proper diagram
+- [ ] Stretch: back-of-class handling, Hinglish. Hinglish is partly handled: Whisper translates the speech to English
 
 Rule: always keep the system working end to end; improve one stage at a time and measure.
 
