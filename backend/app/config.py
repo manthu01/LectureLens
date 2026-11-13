@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     top_k: int = 6
     retrieval_mode: str = "hybrid"  # dense | bm25 | hybrid
-    candidates: int = 30  # how many segments each retriever fetches before reranking
-    reranker_model: str = "Xenova/ms-marco-MiniLM-L-12-v2"  # empty = no reranking
+    # Cross-encoder that scores the top_k hits (order unchanged) for the refusal gate. Empty = off.
+    reranker_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
     # Refuse without calling the LLM when the best rerank score (0..1) is below this. 0 disables the gate.
     rerank_threshold: float = 0.01
     # Public demo mode: adding/retrying lectures is disabled; search, answers, summaries, quizzes still work.

@@ -31,7 +31,7 @@
 Ingestion    YouTube / file ─► audio ─► Whisper ─► ~60s chunks ─► LLM labels ─► embeddings ─► Qdrant
                                                                                 (dense + BM25)
 
-Question     hybrid search (dense + BM25, RRF) ─► cross-encoder rerank ─► confidence gate
+Question     hybrid search (dense + BM25, RRF) ─► cross-encoder score ─► confidence gate
                  ─► Gemini answers from the top segments, citing [lecture · timestamp]
 ```
 
@@ -41,7 +41,7 @@ Question     hybrid search (dense + BM25, RRF) ─► cross-encoder rerank ─�
 | Transcription | faster-whisper (`small`, CPU, translate mode) |
 | Embeddings | `BAAI/bge-small-en-v1.5` via fastembed (ONNX, no PyTorch) |
 | Vector store | Qdrant: dense + BM25 sparse vectors, fused with RRF. Embedded on disk locally, Qdrant Cloud when deployed |
-| Reranker | `Xenova/ms-marco-MiniLM-L-12-v2` cross-encoder |
+| Confidence scorer | `Xenova/ms-marco-MiniLM-L-6-v2` cross-encoder (scores the hits for the refusal gate; does not reorder them) |
 | LLM | Gemini (answers and segment labels), model set in `.env` |
 | Frontend | Next.js 16, Tailwind |
 
@@ -104,18 +104,18 @@ This compares dense, BM25, hybrid and hybrid + rerank retrieval and reports Reca
 
 | Retrieval | Recall@1 | Recall@5 | MRR | Timestamp ±30s | Median latency |
 |---|---|---|---|---|---|
-| Dense | 0.93 | **1.00** | 0.95 | 0.87 | 366 ms |
-| BM25 | 0.82 | 0.98 | 0.89 | 0.76 | 368 ms |
-| Hybrid (RRF) | **0.96** | **1.00** | **0.98** | **0.89** | 383 ms |
-| Hybrid + rerank | 0.91 | **1.00** | 0.94 | **0.89** | 5619 ms |
-| Hybrid + rerank, off-topic kept | 0.91 | 1.00 | 0.94 | 0.89 | 5458 ms |
+| Dense | 0.93 | **1.00** | 0.95 | 0.87 | 405 ms |
+| BM25 | 0.82 | 0.98 | 0.89 | 0.76 | 414 ms |
+| Hybrid (RRF) | **0.96** | **1.00** | **0.98** | **0.89** | 405 ms |
+| Hybrid + confidence score (live setup) | **0.96** | **1.00** | **0.98** | **0.89** | 939 ms |
+| Hybrid + confidence score, off-topic kept | 0.96 | 1.00 | 0.98 | 0.89 | 950 ms |
 
 What this shows so far:
 
 - Hybrid retrieval beats either retriever alone at rank 1. BM25 on its own is weakest, possibly because the transcripts are machine translations with misspelt terms (not yet checked).
-- The cross-encoder reranker does not help on this set: hybrid alone already finds the right passage in the top 5 every time, and reranking lowers rank-1 accuracy (0.96 to 0.91) while making search about 15x slower. A comparison of other reranker models and settings is in progress.
+- Reranking does not help on this set. Hybrid alone already finds the right passage in the top 5 every time. Five cross-encoders (MiniLM-L-6/L-12, jina tiny/turbo, bge-base) re-sorting 10, 20 or 30 candidates all lowered rank-1 accuracy (to 0.87–0.93); blending their ranking with the hybrid ranking at best matched it, except jina-turbo (0.98), which let 5 of the 11 uncovered questions through the refusal gate. Full table: `eval/results/rerank-sweep-20261113-032207.md` (made by `backend/scripts/rerank_sweep.py`). So the app keeps the hybrid order and uses the small MiniLM-L-6 cross-encoder only to score the top hits for the refusal gate (the earlier L-12 re-sort on 30 candidates took 5.6 s per search).
 - Filtering off-topic segments changes nothing on this set, as almost no questions target off-topic talk.
-- Refusals: 9 of the 11 uncovered questions score near 0 with the reranker. Two near misses score high ("bias-variance trade-off" 0.80, "deploying with Flask" 0.52) because lecture 1 lists them as upcoming topics, so for these the refusal relies on the LLM rather than the score threshold.
+- Refusals: the gate uses the best cross-encoder score among the hits. 9 of the 11 uncovered questions score 0.002 or less, while the lowest answerable question scores 0.087, so the threshold (0.01) refuses those 9 without refusing any real question. Two near misses score high ("bias-variance trade-off" 0.77, "deploying with Flask" 0.74) because lecture 1 lists them as upcoming topics, so for these the refusal relies on the LLM rather than the score threshold.
 
 Caveats: 57 of the 66 questions are drafts written from the transcripts (marked `"status": "draft"`) and have not yet been checked against the videos. The set is small, and covers only transcript content, not slides or the board. Treat these numbers as a first baseline.
 
@@ -131,7 +131,7 @@ uv run pytest
 ```
 backend/app/
   ingestion/    acquire, transcribe, chunk, classify, pipeline
-  retrieval/    store (Qdrant), search (hybrid + rerank)
+  retrieval/    store (Qdrant), search (hybrid + cross-encoder score)
   generation/   llm, answer (prompt, citations, SSE stream)
   api.py        REST endpoints
 frontend/       Next.js app: course list, player + transcript, chat

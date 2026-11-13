@@ -1,4 +1,9 @@
-"""Query flow: candidate retrieval (dense / BM25 / hybrid RRF) -> optional cross-encoder rerank."""
+"""Query flow: retrieval (dense / BM25 / hybrid RRF) -> optional cross-encoder relevance score.
+
+The cross-encoder does not reorder results: on the eval set, re-sorting by its score lowered
+recall@1 (0.96 -> 0.91, see eval/results/rerank-sweep-*.md). Its score is used only as the
+confidence signal for refusing questions the lectures don't cover.
+"""
 
 import math
 from functools import lru_cache
@@ -25,18 +30,16 @@ def retrieve(
 ) -> list[dict]:
     """Top-k segments for a question. Arguments left as None fall back to .env settings.
 
-    When reranking, each hit gets `rerank_score` in 0..1 (sigmoid of the cross-encoder logit).
+    When scoring, each returned hit gets `rerank_score` in 0..1 (sigmoid of the cross-encoder
+    logit); the order stays as retrieved.
     """
     mode = mode or settings.retrieval_mode
     k = k or settings.top_k
     rerank = bool(settings.reranker_model) if rerank is None else rerank and bool(settings.reranker_model)
-    if not rerank:
-        return store.search(course_id, question, k, mode, include_off_topic)
-
-    hits = store.search(course_id, question, settings.candidates, mode, include_off_topic)
-    if not hits:
-        return []
+    hits = store.search(course_id, question, k, mode, include_off_topic)
+    if not rerank or not hits:
+        return hits
     logits = _reranker(settings.reranker_model).rerank(question, [h["text"] for h in hits])
     for h, logit in zip(hits, logits):
         h["rerank_score"] = 1 / (1 + math.exp(-logit))
-    return sorted(hits, key=lambda h: h["rerank_score"], reverse=True)[:k]
+    return hits

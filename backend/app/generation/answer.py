@@ -68,7 +68,8 @@ def answer_stream(course_id: int, question: str, include_off_topic: bool = False
     try:
         hits = retrieve(course_id, question, include_off_topic=include_off_topic)
         # Confidence gate: nothing relevant enough -> refuse without spending an LLM call.
-        best = hits[0].get("rerank_score") if hits else None
+        scores = [h["rerank_score"] for h in hits if "rerank_score" in h]
+        best = max(scores) if scores else None
         if not hits or (best is not None and best < settings.rerank_threshold):
             closest = [_citation(i, h) for i, h in enumerate(hits[:3], 1)]
             yield _sse("final", {"answer": NOT_COVERED, "citations": closest, "supported": False})

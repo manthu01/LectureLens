@@ -7,8 +7,8 @@ Each line of the questions file is JSON:
     {"id": "q1", "question": "...", "lecture": 1, "gold_start_sec": 283, "gold_end_sec": 344,
      "gold_answer": "...", "type": "factual"}
 `lecture` is the lecture number shown in the UI. Questions with "type": "unanswerable" have no
-gold span; they are left out of retrieval metrics and used to report rerank scores for tuning
-RERANK_THRESHOLD.
+gold span; they are left out of retrieval metrics and used to report the best rerank score (refusal
+confidence) for tuning RERANK_THRESHOLD. Reranking only adds scores; it does not reorder hits.
 
 A retrieved segment is a hit when it is from the gold lecture and overlaps the gold time range.
 """
@@ -43,7 +43,7 @@ def search(api: str, course: int, question: str, cfg: dict) -> list[dict]:
         try:
             with urllib.request.urlopen(req, timeout=120) as res:
                 return json.loads(res.read())
-        except (ConnectionError, urllib.error.URLError):
+        except (ConnectionError, TimeoutError, urllib.error.URLError):
             if attempt == 2:
                 raise
             time.sleep(2 * (attempt + 1))
@@ -79,13 +79,13 @@ def evaluate(api: str, course: int, questions: list[dict], cfg: dict) -> dict:
                 <= q["gold_end_sec"] + TIMESTAMP_TOLERANCE_SEC
             )
             if "rerank_score" in top:
-                top_ok.append(top["rerank_score"])
+                top_ok.append(max(h["rerank_score"] for h in hits))
         if rank is None:
             misses.append(q["id"])
     for q in unanswerable:
         hits = search(api, course, q["question"], cfg)
         if hits and "rerank_score" in hits[0]:
-            top_un.append(hits[0]["rerank_score"])
+            top_un.append(max(h["rerank_score"] for h in hits))
     n = max(len(answerable), 1)
     return {
         "config": cfg["name"],
@@ -129,7 +129,7 @@ def main() -> None:
         if r["misses"]:
             print(f"\n{r['config']}: no hit in top {K} for {', '.join(r['misses'])}")
     rr = next(r for r in results if r["config"] == "hybrid+rerank")
-    print("\nTop rerank score per question (for choosing RERANK_THRESHOLD):")
+    print("\nBest rerank score per question (for choosing RERANK_THRESHOLD):")
     print("  answerable:  ", rr["top_rerank_answerable"])
     print("  unanswerable:", rr["top_rerank_unanswerable"])
 
