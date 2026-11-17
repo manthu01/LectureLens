@@ -404,7 +404,9 @@ Live demo: https://lecturelens-app.vercel.app (5 lectures of CampusX "100 Days o
 - Partial results (26 graded): 55/55 claims supported by the excerpts and by their cited excerpt, 26/26 answers address the question, and the grader says all 26 match the gold answer.
 - Hand labels: done (`eval/results/judge-20261116-134851-labels.md`; all 20 faithful; q25, q53, q19 "partly" match gold). Agreement on the 11 graded so far: faithful 11/11, gold 9/11 (q25, q19: the grader is lenient on incomplete answers). Run `eval/judge.py --agreement eval/results/judge-20261116-134851-labels.md` to refresh it.
 
-Then: ablations (chunk size, embedding model, classifier on/off, Whisper `small` vs `medium`/`large-v3` for Hinglish translation quality) → demo video + architecture diagram → slide/board reading.
+**Ablations** (`backend/scripts/ablate.py`, results in README and `eval/results/ablations-20261118-024509.md`). Done: chunk length (60 s best on every metric; 120 s drops timestamp accuracy to 0.64), embedding model (keep bge-small; base-size models are no better and 5x slower to index), classifier (topic prefix +2 questions; off-topic filter no effect on this set). In progress: Whisper `medium` is re-transcribing the 5 lectures into `transcript-medium.json` (`backend/scripts/transcribe_variant.py`, about 1.5 h on CPU; it resumes if interrupted). After that, run `ablate.py --only whisper` and add the result to the README, then decide whether `large-v3` (3 to 5 h on CPU) is worth running.
+
+Then: demo video + architecture diagram → slide/board reading.
 Small fixes: the live error message still says "localhost:8000"; the demo has only 5 lectures.
 
 Recent results:
@@ -435,7 +437,7 @@ Recent results:
 
 ### Week 4 — Rigor + polish
 - [ ] Board lectures via vision model; layout detection
-- [ ] Complete eval set (incl. unanswerable + visual-only); run all ablations. Partly done: the unanswerable questions exist, retrieval-mode and reranker ablations are done; still to do are the visual-only questions, the answer-quality eval and the remaining ablations
+- [ ] Complete eval set (incl. unanswerable + visual-only); run all ablations. Partly done: the unanswerable questions exist, retrieval-mode and reranker ablations are done; the answer-quality eval is partly graded (26/55); chunking, embedding and classifier ablations are done; still to do are the visual-only questions and the Whisper ablation
 - [ ] Deploy (live link), demo video (2 min), README with architecture diagram + results table. Partly done: deployed on Vercel and the README has a results table and an ASCII architecture sketch; still to do are the demo video and a proper diagram
 - [ ] Stretch: back-of-class handling, Hinglish. Hinglish is partly handled: Whisper translates the speech to English
 

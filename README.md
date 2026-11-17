@@ -119,6 +119,51 @@ What this shows so far:
 
 Caveats: 57 of the 66 questions were written from the transcripts and checked by reading the transcript text, not by watching the video for each one (marked `"status": "skimmed"`). The transcripts are Whisper's English translation of Hinglish speech, so a gold answer can carry a translation error the video would reveal. The set is small, and covers only transcript content, not slides or the board. Treat these numbers as a first baseline.
 
+### Ablations
+
+```bash
+backend/.venv/Scripts/python backend/scripts/ablate.py --course 1
+```
+
+The script changes one factor at a time and rebuilds a throwaway in-memory index from the cached transcripts, using the app's own chunking, indexing and search code. The live index isn't touched and no LLM calls are made. It uses the same 55 answerable questions and the same hit rule as above. With 55 questions, one question is worth about 0.02, so gaps of 0.02 to 0.04 are 1 or 2 questions. Full tables: `eval/results/ablations-20261118-024509.md`.
+
+**Chunk length** (hybrid, classifier off, because the cached labels only fit 60 s chunks):
+
+| Target length | Chunks | Recall@1 | Recall@5 | MRR | Timestamp ±30s |
+|---|---|---|---|---|---|
+| 30 s | 204 | 0.84 | 1.00 | 0.90 | 0.85 |
+| **60 s (app)** | 100 | **0.93** | 1.00 | **0.96** | **0.89** |
+| 90 s | 66 | 0.87 | 1.00 | 0.93 | 0.75 |
+| 120 s | 51 | 0.89 | 1.00 | 0.94 | 0.64 |
+
+Longer chunks overlap the gold span more easily, so they should score well on recall by construction. Even so, 60 s is best on every metric. The real cost of long chunks shows in timestamp accuracy: at 120 s, the top hit starts within 30 s of the answer only 64% of the time, so a click lands too early. 30 s chunks are too short to carry the context a question needs.
+
+**Embedding model** (60 s chunks, classifier on, measured on this laptop's CPU):
+
+| Model | Dense Recall@1 | Hybrid Recall@1 | Hybrid MRR | Index time | Query (dense) |
+|---|---|---|---|---|---|
+| **bge-small-en-v1.5 (app)** | **0.93** | **0.96** | **0.98** | 7 s | 12 ms |
+| bge-base-en-v1.5 | 0.91 | 0.95 | 0.97 | 36 s | 28 ms |
+| all-MiniLM-L6-v2 | 0.89 | 0.95 | 0.97 | 11 s | 8 ms |
+| gte-base | 0.89 | 0.93 | 0.96 | 37 s | 27 ms |
+| jina-embeddings-v2-small-en | 0.93 | 0.93 | 0.96 | 12 s | 12 ms |
+| granite-embedding-small-english-r2 | 0.89 | 0.89 | 0.94 | 24 s | 16 ms |
+
+The larger base-size models don't beat bge-small here and take 5 times as long to index. Every model finds the gold passage in the top 5 except jina-small dense (0.96).
+
+**Segment classifier** (60 s chunks, bge-small, hybrid):
+
+| Labels used for | Recall@1 | MRR |
+|---|---|---|
+| Nothing | 0.93 | 0.96 |
+| Off-topic filter only | 0.93 | 0.96 |
+| Topic prefix only | 0.96 | 0.98 |
+| **Both (app)** | 0.96 | 0.98 |
+
+Embedding each chunk with its classifier topic in front gains 2 questions. The off-topic filter changes nothing, because no question in this set targets off-topic talk; its job is to keep chit-chat out of answers, which this set doesn't test.
+
+**Whisper model size:** in progress (`small`, the app default, vs `medium`; made with `backend/scripts/transcribe_variant.py`).
+
 ### Answer quality
 
 ```bash
