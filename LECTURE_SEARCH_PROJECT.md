@@ -394,12 +394,15 @@ Plan: start with one course you know well (~20 lectures), screen-only first; the
 
 ## 14. Build Plan (≈4 weeks part-time)
 
-### Status (updated 2026-11-13)
+### Status (updated 2026-11-18)
 
 Live demo: https://lecturelens-app.vercel.app (5 lectures of CampusX "100 Days of Machine Learning").
 
-**Next up: answer-quality eval** (refusal rate over all 11 uncovered questions plus false refusals on the 55 answerable ones, faithfulness, correctness against gold answers, citation accuracy).
-Pending decision: which model grades the answers. Gemini is free with the existing key but grades its own output; Claude is more independent but needs an Anthropic API key in `.env`.
+**In progress: answer-quality eval** (`eval/judge.py`). Decided: the grader is Gemini, not Claude (Claude would need paid API credits). Answers come from `gemini-3.5-flash-lite` and are graded by a different, larger model, `gemini-3.6-flash` (`3.8-flash` was the first choice but kept returning 503/504 errors on the free tier). For each answer, the grader splits it into claims and checks each one against the retrieved excerpts and against the excerpt it cites. It also checks whether the answer addresses the question and whether it agrees with the gold answer (yes/partly/no). Refusals are counted from the answer text, with no grader.
+- Done: all 66 answers generated and saved in `eval/results/judge-20261116-134851.json`. Refusals: 11/11 uncovered questions refused (9 by the score gate, 2 by the LLM: u3, u10), and 0 of the 55 answerable questions refused.
+- Grading: 26 of 55 answers graded (q4 was cleared for re-grading after a fix: the grader now sees lecture titles, as the answering model does). On the free tier, the 20-a-day limit plus frequent 503/504 overloads gave about one grade per day, so the script makes no retries and stops at the first error. Results so far are written up in the README as **partial**. To grade more when convenient: `backend/.venv/Scripts/python eval/judge.py --answers eval/results/judge-20261116-134851.json`. To refresh the report without API calls, add `--report-only`. When the count changes, update the README table.
+- Partial results (26 graded): 55/55 claims supported by the excerpts and by their cited excerpt, 26/26 answers address the question, and the grader says all 26 match the gold answer.
+- Hand labels: done (`eval/results/judge-20261116-134851-labels.md`; all 20 faithful; q25, q53, q19 "partly" match gold). Agreement on the 11 graded so far: faithful 11/11, gold 9/11 (q25, q19: the grader is lenient on incomplete answers). Run `eval/judge.py --agreement eval/results/judge-20261116-134851-labels.md` to refresh it.
 
 Then: ablations (chunk size, embedding model, classifier on/off, Whisper `small` vs `medium`/`large-v3` for Hinglish translation quality) → demo video + architecture diagram → slide/board reading.
 Small fixes: the live error message still says "localhost:8000"; the demo has only 5 lectures.

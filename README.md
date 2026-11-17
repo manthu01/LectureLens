@@ -115,9 +115,32 @@ What this shows so far:
 - Hybrid retrieval beats either retriever alone at rank 1. BM25 on its own is weakest, possibly because the transcripts are machine translations with misspelt terms (not yet checked).
 - Reranking does not help on this set. Hybrid alone already finds the right passage in the top 5 every time. Five cross-encoders (MiniLM-L-6/L-12, jina tiny/turbo, bge-base) re-sorting 10, 20 or 30 candidates all lowered rank-1 accuracy (to 0.87–0.93); blending their ranking with the hybrid ranking at best matched it, except jina-turbo (0.98), which let 5 of the 11 uncovered questions through the refusal gate. Full table: `eval/results/rerank-sweep-20261113-032207.md` (made by `backend/scripts/rerank_sweep.py`). So the app keeps the hybrid order and uses the small MiniLM-L-6 cross-encoder only to score the top hits for the refusal gate (the earlier L-12 re-sort on 30 candidates took 5.6 s per search).
 - Filtering off-topic segments changes nothing on this set, as almost no questions target off-topic talk.
-- Refusals: the gate uses the best cross-encoder score among the hits. 9 of the 11 uncovered questions score 0.002 or less, while the lowest answerable question scores 0.087, so the threshold (0.01) refuses those 9 without refusing any real question. Two near misses score high ("bias-variance trade-off" 0.77, "deploying with Flask" 0.74) because lecture 1 lists them as upcoming topics, so for these the refusal relies on the LLM rather than the score threshold. Asking the live demo both questions (2026-11-13) gave the "not covered" reply with the closest moments linked, so they are refused end to end; a systematic answer-level check is still to do.
+- Refusals: the gate uses the best cross-encoder score among the hits. 9 of the 11 uncovered questions score 0.002 or less, while the lowest answerable question scores 0.087, so the threshold (0.01) refuses those 9 without refusing any real question. Two near misses score high ("bias-variance trade-off" 0.77, "deploying with Flask" 0.74) because lecture 1 lists them as upcoming topics, so for these the refusal relies on the LLM rather than the score threshold. Asking the live demo both questions (2026-11-13) gave the "not covered" reply with the closest moments linked, so they are refused end to end. The answer-quality run below confirms this for all 11.
 
 Caveats: 57 of the 66 questions were written from the transcripts and checked by reading the transcript text, not by watching the video for each one (marked `"status": "skimmed"`). The transcripts are Whisper's English translation of Hinglish speech, so a gold answer can carry a translation error the video would reveal. The set is small, and covers only transcript content, not slides or the board. Treat these numbers as a first baseline.
+
+### Answer quality
+
+```bash
+backend/.venv/Scripts/python eval/judge.py --course 1   # runs the answer pipeline locally, then grades
+```
+
+`eval/judge.py` asks all 66 questions through the same pipeline the app uses, then has a separate, larger Gemini model (`gemini-3.6-flash`) grade each answer. Answers are written by `gemini-3.5-flash-lite`. The grader splits each answer into claims, checks each claim against the retrieved excerpts and against the excerpt it cites, and compares the answer with the gold answer. Refusals are counted from the answer text, without the grader. Run on 2026-11-16 to 2026-11-18.
+
+**Partial:** 26 of the 55 answers are graded so far. The free tier allows 20 grading calls a day, and the model is often overloaded, so grading is being finished a few answers at a time. The refusal rows cover all 66 questions.
+
+| Metric | Result |
+|---|---|
+| Covered questions answered (not refused) | 55 / 55 |
+| Uncovered questions refused | 11 / 11 (9 by the score gate, 2 by the LLM: bias-variance, Flask) |
+| Claims supported by the retrieved excerpts | 55 / 55 claims |
+| Claims supported by the excerpt they cite | 55 / 55 claims |
+| Answers that address the question | 26 / 26 |
+| Agrees with the gold answer (grader) | 26 / 26 "yes" |
+
+**Checking the grader:** 20 answers picked at random were labelled by hand, blind to the grader's verdicts (`eval/results/judge-20261116-134851-labels.md`). On the 11 of them graded so far, the grader agrees with the human on faithfulness 11 of 11 times and on matching the gold answer 9 of 11 times. Both disagreements (q25, q19) are answers that leave out part of the gold answer: the human marked them "partly", the grader "yes". So the grader is lenient about incomplete answers, and the 100% gold agreement above overstates completeness (the human marked 3 of 20 answers "partly"). All 20 hand-labelled answers were faithful, so this check shows that the grader doesn't flag good answers by mistake, but not that it catches unfaithful ones.
+
+One grading bug was found and fixed. The grader first saw excerpts without their lecture titles, so it flagged an answer (q4) that correctly named its lecture as unsupported. Excerpts now carry the same lecture header the answering model sees, and q4 will be graded again.
 
 ## Tests
 
