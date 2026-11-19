@@ -1,4 +1,4 @@
-from app.generation.answer import cited_indices, fmt_time
+from app.generation.answer import cited_indices, fmt_time, overview_lecture
 from app.generation.derive import build_timeline, parse_quiz
 from app.ingestion.chunk import chunk_transcript
 from app.ingestion.classify import parse_labels
@@ -109,3 +109,13 @@ def test_parse_quiz_drops_malformed_questions():
 def test_fmt_time():
     assert fmt_time(75) == "1:15"
     assert fmt_time(3725.9) == "1:02:05"
+
+
+def test_overview_lecture_detects_questions_about_the_lectures():
+    assert overview_lecture("what is this lecture about?") == (True, None)
+    assert overview_lecture("what is in this lecture?") == (True, None)
+    assert overview_lecture("What topics does the course cover?") == (True, None)
+    assert overview_lecture("summarise lecture 3") == (True, 3)
+    assert overview_lecture("what's in L4?") == (True, 4)
+    assert overview_lecture("What is the bias-variance trade-off?")[0] is False
+    assert overview_lecture("who do you work for?")[0] is False
