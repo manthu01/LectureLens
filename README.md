@@ -27,13 +27,41 @@
 
 ## How it works
 
-```
-Ingestion    YouTube / file ─► audio ─► Whisper ─► ~60s chunks ─► LLM labels ─► embeddings ─► Qdrant
-                                                                                (dense + BM25)
+```mermaid
+flowchart LR
+    UI["Next.js frontend<br/>(Vercel)"]
+    API["FastAPI backend<br/>(Vercel container)"]
+    UI -- "REST + SSE" --> API
 
-Question     hybrid search (dense + BM25, RRF) ─► cross-encoder score ─► confidence gate
-                 ─► Gemini answers from the top segments, citing [lecture · timestamp]
+    subgraph Ingest["Ingestion (background, resumable)"]
+        direction LR
+        SRC["YouTube URL / playlist<br/>or uploaded file"] --> AUD["audio<br/>(yt-dlp)"]
+        AUD --> WH["faster-whisper small<br/>translate to English"]
+        WH --> CH["~60 s chunks"]
+        CH --> CL["Gemini labels each chunk<br/>teaching / off_topic / admin / exam_hint<br/>+ topic name"]
+        CL --> EMB["embed 'topic. text'<br/>bge-small dense + BM25 sparse"]
+    end
+
+    subgraph Ask["Question answering"]
+        direction LR
+        Q["question"] --> HY["hybrid search<br/>dense + BM25, RRF"]
+        HY --> CE["cross-encoder scores top-k<br/>(order unchanged)"]
+        CE --> GATE{"best score<br/>≥ 0.01?"}
+        GATE -- no --> REF["refuse: not covered<br/>in these lectures"]
+        GATE -- yes --> GEN["Gemini answers from top segments<br/>cites [lecture · timestamp]"]
+    end
+
+    API --> SRC
+    API --> Q
+    EMB --> QD[("Qdrant<br/>local on disk / Qdrant Cloud")]
+    QD --> HY
+    API --- DB[("SQLite<br/>courses, lectures, status")]
+    CL --> DER["timeline, summary,<br/>quiz, exam hints"]
+    DER --> API
+    GEN -- "streamed answer + citations" --> API
 ```
+
+Ingestion caches the transcript and the labels on disk per lecture, so a restart picks up where it stopped. Search and the exam-hint / announcement views filter on the chunk labels; off-topic chunks are left out of answers unless the user asks for them.
 
 | Layer | Choice |
 |---|---|
