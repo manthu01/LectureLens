@@ -162,7 +162,14 @@ The larger base-size models don't beat bge-small here and take 5 times as long t
 
 Embedding each chunk with its classifier topic in front gains 2 questions. The off-topic filter changes nothing, because no question in this set targets off-topic talk; its job is to keep chit-chat out of answers, which this set doesn't test.
 
-**Whisper model size:** in progress (`small`, the app default, vs `medium`; made with `backend/scripts/transcribe_variant.py`).
+**Whisper model size** (60 s chunks, bge-small, classifier off; transcripts made with `backend/scripts/transcribe_variant.py`, results in `eval/results/ablations-20261119-132809.md`):
+
+| Whisper | Hybrid R@1 | Hybrid MRR | Hybrid TS ±30s | Dense R@1 | Dense TS ±30s | Transcribe speed (CPU) |
+|---|---|---|---|---|---|---|
+| small (app) | **0.93** | **0.96** | **0.89** | **0.91** | **0.87** | faster |
+| medium | 0.91 | 0.95 | 0.87 | 0.85 | 0.82 | 1.2x to 1.85x real time |
+
+Recall@5 is 1.00 for both. `medium` is no better for retrieval and several times slower, so the app keeps `small` and `large-v3` was not run. Caveat: the gold timestamps and questions were written against the `small` transcripts, which may favour `small` slightly.
 
 ### Answer quality
 
