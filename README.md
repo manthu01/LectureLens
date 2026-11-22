@@ -207,17 +207,17 @@ backend/.venv/Scripts/python eval/judge.py --course 1   # runs the answer pipeli
 
 `eval/judge.py` asks all 66 questions through the same pipeline the app uses, then has a separate, larger Gemini model (`gemini-3.6-flash`) grade each answer. Answers are written by `gemini-3.5-flash-lite`. The grader splits each answer into claims, checks each claim against the retrieved excerpts and against the excerpt it cites, and compares the answer with the gold answer. Refusals are counted from the answer text, without the grader. Run on 2026-11-16 to 2026-11-22.
 
-**Partial:** 50 of the 55 answers are graded so far. The free tier allows about 20 grading calls a day, and the model is often overloaded, so grading is being finished a few answers at a time. The refusal rows cover all 66 questions.
+**Partial:** 52 of the 55 answers are graded so far. The free tier allows about 20 grading calls a day, and the model is often overloaded, so grading is being finished a few answers at a time. The refusal rows cover all 66 questions.
 
 | Metric | Result |
 |---|---|
 | Covered questions answered (not refused) | 55 / 55 |
 | Uncovered questions refused | 11 / 11 (9 by the score gate, 2 by the LLM: bias-variance, Flask) |
-| Claims supported by the retrieved excerpts | 108 / 109 claims (99%) |
+| Claims supported by the retrieved excerpts | 113 / 114 claims (99%) |
 | Claims supported by the excerpt they cite | 98% |
-| Answers with every claim supported | 49 / 50 |
-| Answers that address the question | 50 / 50 |
-| Agrees with the gold answer (grader) | 49 / 50 "yes", 1 "no" |
+| Answers with every claim supported | 51 / 52 |
+| Answers that address the question | 52 / 52 |
+| Agrees with the gold answer (grader) | 51 / 52 "yes", 1 "no" |
 
 The two flagged answers: q35 ("What is association rule learning?") has one claim of four, "a powerful application of unsupervised learning", that its cited excerpt doesn't say; the rest is supported. q36 ("Where does he tell the story about beer and baby diapers?") answers only "in Lecture 3" with a timestamp citation, which is right but leaves out the story, so the grader marks it as not matching the gold answer.
 

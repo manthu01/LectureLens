@@ -10,20 +10,20 @@
     "unanswerable_refused_by_gate": 9,
     "unanswerable_refused_by_llm": 2,
     "unanswerable_answered": [],
-    "n_judged": 50,
+    "n_judged": 52,
     "n_to_judge": 55,
-    "n_claims": 109,
-    "claim_support": 0.9908256880733946,
-    "citation_support": 0.981651376146789,
-    "fully_faithful_answers": 0.98,
+    "n_claims": 114,
+    "claim_support": 0.9912280701754386,
+    "citation_support": 0.9824561403508771,
+    "fully_faithful_answers": 0.9807692307692307,
     "unfaithful": [
       "q35"
     ],
     "answers_question": 1.0,
     "matches_reference": {
-      "yes": 0.98,
+      "yes": 0.9807692307692307,
       "partly": 0.0,
-      "no": 0.02
+      "no": 0.019230769230769232
     },
     "reference_no": [
       "q36"
@@ -4479,7 +4479,39 @@
       "answer": "For online machine learning, you can use River, which is a Python library specifically for online machine learning and streaming data [S1][S2]. Another famous library you can use is Vopal Babit, which is very useful in reinforcement learning and also offers an option for online machine learning [S2]. Additionally, you can use scikit-learn, though it is a bit typical for this purpose because it supports batch learning more than online learning by design [S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "You can use River, a Python library specifically for online machine learning and streaming data.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Another famous library is Vopal Babit, which is useful in reinforcement learning and offers an option for online machine learning.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "You can also use scikit-learn, though it is a bit typical because by design it supports batch learning more than online learning.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q52",
@@ -4539,7 +4571,31 @@
       "answer": "The learning rate in online learning decides how frequently you will train your data or how frequently you want to train your model, balancing the speed at which you remember old things and learn new things [S1][S2]. Setting a correct learning rate is the most difficult and tricky thing because if it is not done properly, your model can misbehave or fail to perform as expected [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "The learning rate in online learning decides how frequently you will train your data or how frequently you want to train your model, balancing the speed at which you remember old things and learn new things.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Setting a correct learning rate is the most difficult and tricky thing because if it is not done properly, your model can misbehave or fail to perform as expected.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q53",
