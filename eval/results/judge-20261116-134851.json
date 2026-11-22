@@ -10,20 +10,24 @@
     "unanswerable_refused_by_gate": 9,
     "unanswerable_refused_by_llm": 2,
     "unanswerable_answered": [],
-    "n_judged": 26,
+    "n_judged": 50,
     "n_to_judge": 55,
-    "n_claims": 55,
-    "claim_support": 1.0,
-    "citation_support": 1.0,
-    "fully_faithful_answers": 1.0,
-    "unfaithful": [],
+    "n_claims": 109,
+    "claim_support": 0.9908256880733946,
+    "citation_support": 0.981651376146789,
+    "fully_faithful_answers": 0.98,
+    "unfaithful": [
+      "q35"
+    ],
     "answers_question": 1.0,
     "matches_reference": {
-      "yes": 1.0,
+      "yes": 0.98,
       "partly": 0.0,
-      "no": 0.0
+      "no": 0.02
     },
-    "reference_no": []
+    "reference_no": [
+      "q36"
+    ]
   },
   "rows": [
     {
@@ -335,7 +339,41 @@
       "answer": "He explains what an expert system is in Lecture 2 (AI Vs ML Vs DL for Beginners in Hindi), stating it is a system formed using symbolic AI where an expert's knowledge is converted into code, consisting of a knowledge base taken from an expert and an inference engine that makes decisions based on that knowledge base [S1][S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "He explains what an expert system is in Lecture 2 (AI Vs ML Vs DL for Beginners in Hindi).",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "An expert system is a system formed using symbolic AI where an expert's knowledge is converted into code.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "An expert system consists of a knowledge base taken from an expert and an inference engine that makes decisions based on that knowledge base.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q5",
@@ -2467,7 +2505,43 @@
       "answer": "To determine whether a supervised machine learning problem is a regression or a classification problem, you look at the output or target column [S1][S2][S3]. If the output column is a number, it is regression [S1][S3][S5]. If the output column is a category, it is classification [S2][S5].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "To determine whether a supervised machine learning problem is a regression or a classification problem, you look at the output or target column.",
+            "cited": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "If the output column is a number, it is regression.",
+            "cited": [
+              "S1",
+              "S3",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "If the output column is a category, it is classification.",
+            "cited": [
+              "S2",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q29",
@@ -2527,7 +2601,20 @@
       "answer": "Predicting a student's salary package from IQ and CGPA is a regression problem because the output or target column is numerical.",
       "supported": false,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Predicting a student's salary package from IQ and CGPA is a regression problem because the output or target column is numerical.",
+            "cited": [],
+            "supported_by_excerpts": true,
+            "supported_by_cited": false
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q30",
@@ -2587,7 +2674,40 @@
       "answer": "Clustering is a technique used in unsupervised machine learning where you have input data without output or task prediction, and a clustering algorithm detects which data points should come together in groups [S2][S5]. An e-commerce website can use clustering to know the types of customers it has, understand how they behave, and determine what categories they can be put into [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Clustering is a technique used in unsupervised machine learning where input data lacks output or task prediction.",
+            "cited": [
+              "S2",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "A clustering algorithm detects which data points should come together in groups.",
+            "cited": [
+              "S2",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "An e-commerce website can use clustering to understand customer types, customer behavior, and customer categories.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q31",
@@ -2647,7 +2767,48 @@
       "answer": "Dimensionality reduction is needed because having too many input columns (such as 1,000 columns in image or text data) makes algorithms run very slowly, and after a certain point, extra columns do not improve the results [S1]. Additionally, when data has too many dimensions or axes (like 100, 500, or 2,000 columns), it is impossible to plot or visualize it on a standard 2D or 3D coordinate system graph [S5]. Dimensionality reduction removes these extra columns or reduces the high-dimensional space down to 2 or 3 dimensions, allowing you to capture and study the relationships between points [S1][S4][S5].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Having too many input columns (such as 1,000 columns in image or text data) makes algorithms run very slowly.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "After a certain point, extra input columns do not improve the results.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "When data has too many dimensions or axes (like 500 or 2,000 columns), it cannot be plotted or visualized on a 3D coordinate system.",
+            "cited": [
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Dimensionality reduction removes extra columns or reduces high-dimensional space down to 2 or 3 dimensions to capture and study relationships between points.",
+            "cited": [
+              "S1",
+              "S4",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q32",
@@ -2707,7 +2868,22 @@
       "answer": "Combining related columns, such as number of rooms and washrooms, into a single column (like square feet area) is called feature extraction, where you create a new column from multiple given columns [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Combining related columns, such as the number of rooms and washrooms, into a single column like square feet area creates a new column from multiple given columns, which is called feature extraction.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q33",
@@ -2767,7 +2943,22 @@
       "answer": "The MNIST dataset has 784 columns in tabular form, which are formed by converting each pixel of its 28 by 28 pixel images into a column [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "The MNIST dataset has 784 columns in tabular form, which are formed by converting each pixel of its 28 by 28 pixel images into a column.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q34",
@@ -2827,7 +3018,31 @@
       "answer": "Anomaly detection is used to detect outliers or anomalies—such as a point that is quite far from other points, things going wrong, defects in manufacturing, credit card processing issues, loan approval problems, or a spike where share values run out of range—so they can be removed or flagged [S1][S2]. It can also be used as part of a monitoring system to handle situations where incoming data gets messed up, allowing you to offline the system, reject the data, or save the system [S4].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Anomaly detection is used to detect outliers or anomalies, such as points quite far from other points, things going wrong, manufacturing defects, credit card processing issues, loan approval problems, or share value spikes, so they can be removed or flagged.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Anomaly detection can be used in a monitoring system to handle situations where incoming data gets messed up, allowing you to offline the system, reject the data, or save the system.",
+            "cited": [
+              "S4"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q35",
@@ -2887,7 +3102,46 @@
       "answer": "Association rule learning is a powerful application of unsupervised learning [S1] and a category of unsupervised learning [S3]. In association rule-based learning, you fetch and mine information from data to draw conclusions, such as generating shopping bills from the last 1-2 years to notice patterns [S2]. For example, if scanning 100 bills shows that milk was bought 80 times and eggs were bought 60 times out of those, it reveals a strong association between the two products, which is why they are kept together in a store like Spencer's or Big Bazaar [S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Association rule learning is a powerful application of unsupervised learning.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": false,
+            "supported_by_cited": false
+          },
+          {
+            "claim": "Association rule learning is a category of unsupervised learning.",
+            "cited": [
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "In association rule-based learning, you fetch and mine information from data to draw conclusions, such as generating shopping bills from the last 1-2 years to notice patterns.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "If scanning 100 bills shows that milk was bought 80 times and eggs were bought 60 times out of those, it reveals a strong association between the two products, which is why they are kept together in a store like Spencer's or Big Bazaar.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q36",
@@ -2947,7 +3201,22 @@
       "answer": "He tells the story about beer and baby diapers in Lecture 3. [S1]",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "The story about beer and baby diapers is told in Lecture 3.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "no"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q37",
@@ -3007,7 +3276,40 @@
       "answer": "Semi-supervised learning is useful because creating manual labels for data requires human effort and hours, which costs money and makes labelling difficult and expensive [S1][S2]. With semi-supervised learning, you do not have to label all the data points; you only need to label one or two data points, and the rest of the points will be labeled automatically behind the scenes [S2][S3]. This makes the process very cheap [S3].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Semi-supervised learning is useful because creating manual labels for data requires human effort and hours, which costs money and makes labelling difficult and expensive.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "With semi-supervised learning, you do not have to label all the data points, needing only to label one or two data points while the rest are labeled automatically behind the scenes.",
+            "cited": [
+              "S2",
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Semi-supervised learning makes the labelling process very cheap.",
+            "cited": [
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q38",
@@ -3067,7 +3369,31 @@
       "answer": "Google Photos uses semi-supervised learning by automatically identifying and clustering photos of the same person taken in one place [S1][S2]. As a user, you only have to label one photo, and the rest of the work is done behind the scenes as the system automatically labels the remaining photos of that person [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Google Photos uses semi-supervised learning by automatically identifying and clustering photos of the same person taken in one place.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "As a user, you only have to label one photo, and the system automatically labels the remaining photos of that person behind the scenes.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q39",
@@ -3127,7 +3453,39 @@
       "answer": "In reinforcement learning, the algorithm is called the agent, which lives in a given environment [S2]. The policy acts as the agent's rule book determining what it should do [S1]. A reward is given for good actions to increase rewards or reduce punishments, while going to negative areas like fire results in a punishment where points are redacted [S1][S3].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "In reinforcement learning, the algorithm is called the agent, which lives in a given environment.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "The policy acts as the agent's rule book determining what it should do.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "A reward is given for good actions to increase rewards or reduce punishments, while negative actions like going to fire result in punishment where points are redacted.",
+            "cited": [
+              "S1",
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q40",
@@ -3187,7 +3545,30 @@
       "answer": "DeepMind created an agent called AlphaGo to play the game Go [S1]. In 2016 or 2017, it defeated the human champion of this game 4 times in 5 straight games [S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "DeepMind created an agent called AlphaGo to play the game Go.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "In 2016 or 2017, AlphaGo defeated the human champion of Go 4 times in 5 straight games.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q41",
@@ -3247,7 +3628,22 @@
       "answer": "When you make machine learning software and deploy it on a server, the server environment where your code is running is called a production environment [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "When machine learning software is deployed on a server, the server environment where the code runs is called a production environment.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q42",
@@ -3307,7 +3703,56 @@
       "answer": "Batch learning, also called offline learning, is the conventional way of training a machine learning model where you utilize and train with all your data at once, meaning there is no incremental training [S2][S5]. In this process, a data scientist or machine learning engineer trains the model on an offline system or their own machine [S3]. Once the model is trained and tested, it is deployed onto a server in the production environment where it only performs predictions [S3][S4]. If you want to train it again, you have to bring it offline [S4]. Complexity-wise, offline or batch learning is less complex because you simply train on your machine and predict on the server [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Batch learning, also called offline learning, is the conventional way of training a machine learning model where you utilize and train with all your data at once, meaning there is no incremental training.",
+            "cited": [
+              "S2",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "In this process, a data scientist or machine learning engineer trains the model on an offline system or their own machine.",
+            "cited": [
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Once the model is trained and tested, it is deployed onto a server in the production environment where it only performs predictions.",
+            "cited": [
+              "S3",
+              "S4"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "If you want to train the model again, you have to bring it offline.",
+            "cited": [
+              "S4"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Offline or batch learning is less complex because you simply train on your machine and predict on the server.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q43",
@@ -3367,7 +3812,30 @@
       "answer": "A batch-trained recommendation engine becomes a problem because the model is static and once learned, it does not learn anything new, working only on old things [S2]. Netflix constantly adds new movies every week, so a recommendation engine must continually evolve and grow to incorporate these new movies [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "A batch-trained recommendation engine becomes a problem because the model is static and, once learned, does not learn anything new, working only on old data.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Netflix adds new movies every week, so a recommendation engine must constantly evolve and grow to incorporate those new movies.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q44",
@@ -3427,7 +3895,32 @@
       "answer": "Batch learning models are generally retrained periodically, such as every 24 hours, once a week, or on a monthly basis, depending on factors like the amount of data [S1][S4].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Batch learning models are generally retrained periodically, such as every 24 hours, once a week, or on a monthly basis.",
+            "cited": [
+              "S1",
+              "S4"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "The retraining frequency depends on factors like the amount of data.",
+            "cited": [
+              "S1",
+              "S4"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q45",
@@ -3487,7 +3980,23 @@
       "answer": "Batch learning fails in these scenarios because there is no internet connectivity, meaning you cannot take frequent updates, immediately bring the model to train on new data, and then upload it [S1][S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Batch learning fails in these scenarios because there is no internet connectivity, meaning you cannot take frequent updates, immediately bring the model to train on new data, and then upload it.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q46",
@@ -3547,7 +4056,40 @@
       "answer": "The demonetization news feed example shows how batch learning can fail in certain scenarios [S1]. When a batch learning system is used for a social networking news feed, it only updates based on new data after 24 hours [S1][S2]. Because of this delay, important breaking news (like demonetization) cannot appear in the user's news feed immediately when they are interested in it, and by the time the system updates after 24 hours, the news feed will be filled with outdated information that is no longer important [S1][S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "The demonetization news feed example shows how batch learning can fail in certain scenarios.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "When a batch learning system is used for a social networking news feed, it only updates based on new data after 24 hours.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Because of this 24-hour delay, important breaking news like demonetization cannot appear in the user's news feed immediately when they are interested in it, and after 24 hours when the system updates, the feed is filled with information that is no longer important.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q47",
@@ -3607,7 +4149,24 @@
       "answer": "In online learning, mini-batches are very small chunks or small data sets created from a big dataset, which are fed sequentially to the model, one after the other, to perform incremental training [S1][S2][S6].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "In online learning, mini-batches are very small chunks or small data sets created from a big dataset, which are fed sequentially to the model, one after the other, to perform incremental training.",
+            "cited": [
+              "S1",
+              "S2",
+              "S6"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q48",
@@ -3667,7 +4226,40 @@
       "answer": "Real-world examples of online learning include chatbots from famous companies like Google Now, Alexa, and Siri [S2][S5]. Another example is the Swift Key Keyboard app on Android phones, which dynamically improves its performance and personalizes based on user typing behavior [S2]. YouTube is also an example, where the feed automatically modifies and recommends content based on the videos a user has watched and the data generated from clicks [S1][S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Real-world examples of online learning include chatbots from famous companies like Google Now, Alexa, and Siri.",
+            "cited": [
+              "S2",
+              "S5"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "The Swift Key Keyboard app on Android phones dynamically improves its performance and personalizes based on user typing behavior.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "YouTube is an example of online learning where the feed automatically modifies and recommends content based on the videos a user has watched and data generated from clicks.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q49",
@@ -3727,7 +4319,31 @@
       "answer": "Concept drift occurs when the nature of a problem, or the concept itself, changes and is not constant over time [S1][S2]. This happens when the scenario or context changes very quickly, such as with a stock exchange or e-commerce platforms where seasons change and customers' buying preferences shift [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Concept drift occurs when the nature of a problem, or the concept itself, changes over time.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Concept drift happens when the scenario or context changes very quickly, such as with a stock exchange or e-commerce platforms where seasons change and customers' buying preferences shift.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q50",
@@ -3787,7 +4403,23 @@
       "answer": "The partial fit method in scikit-learn lets you train a model incrementally by providing bits of data sequentially [S1][S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "The partial fit method in scikit-learn lets you train a model incrementally by providing bits of data sequentially.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q51",

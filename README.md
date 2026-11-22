@@ -205,22 +205,25 @@ Recall@5 is 1.00 for both. `medium` is no better for retrieval and several times
 backend/.venv/Scripts/python eval/judge.py --course 1   # runs the answer pipeline locally, then grades
 ```
 
-`eval/judge.py` asks all 66 questions through the same pipeline the app uses, then has a separate, larger Gemini model (`gemini-3.6-flash`) grade each answer. Answers are written by `gemini-3.5-flash-lite`. The grader splits each answer into claims, checks each claim against the retrieved excerpts and against the excerpt it cites, and compares the answer with the gold answer. Refusals are counted from the answer text, without the grader. Run on 2026-11-16 to 2026-11-18.
+`eval/judge.py` asks all 66 questions through the same pipeline the app uses, then has a separate, larger Gemini model (`gemini-3.6-flash`) grade each answer. Answers are written by `gemini-3.5-flash-lite`. The grader splits each answer into claims, checks each claim against the retrieved excerpts and against the excerpt it cites, and compares the answer with the gold answer. Refusals are counted from the answer text, without the grader. Run on 2026-11-16 to 2026-11-22.
 
-**Partial:** 26 of the 55 answers are graded so far. The free tier allows 20 grading calls a day, and the model is often overloaded, so grading is being finished a few answers at a time. The refusal rows cover all 66 questions.
+**Partial:** 50 of the 55 answers are graded so far. The free tier allows about 20 grading calls a day, and the model is often overloaded, so grading is being finished a few answers at a time. The refusal rows cover all 66 questions.
 
 | Metric | Result |
 |---|---|
 | Covered questions answered (not refused) | 55 / 55 |
 | Uncovered questions refused | 11 / 11 (9 by the score gate, 2 by the LLM: bias-variance, Flask) |
-| Claims supported by the retrieved excerpts | 55 / 55 claims |
-| Claims supported by the excerpt they cite | 55 / 55 claims |
-| Answers that address the question | 26 / 26 |
-| Agrees with the gold answer (grader) | 26 / 26 "yes" |
+| Claims supported by the retrieved excerpts | 108 / 109 claims (99%) |
+| Claims supported by the excerpt they cite | 98% |
+| Answers with every claim supported | 49 / 50 |
+| Answers that address the question | 50 / 50 |
+| Agrees with the gold answer (grader) | 49 / 50 "yes", 1 "no" |
 
-**Checking the grader:** 20 answers picked at random were labelled by hand, blind to the grader's verdicts (`eval/results/judge-20261116-134851-labels.md`). On the 11 of them graded so far, the grader agrees with the human on faithfulness 11 of 11 times and on matching the gold answer 9 of 11 times. Both disagreements (q25, q19) are answers that leave out part of the gold answer: the human marked them "partly", the grader "yes". So the grader is lenient about incomplete answers, and the 100% gold agreement above overstates completeness (the human marked 3 of 20 answers "partly"). All 20 hand-labelled answers were faithful, so this check shows that the grader doesn't flag good answers by mistake, but not that it catches unfaithful ones.
+The two flagged answers: q35 ("What is association rule learning?") has one claim of four, "a powerful application of unsupervised learning", that its cited excerpt doesn't say; the rest is supported. q36 ("Where does he tell the story about beer and baby diapers?") answers only "in Lecture 3" with a timestamp citation, which is right but leaves out the story, so the grader marks it as not matching the gold answer.
 
-One grading bug was found and fixed. The grader first saw excerpts without their lecture titles, so it flagged an answer (q4) that correctly named its lecture as unsupported. Excerpts now carry the same lecture header the answering model sees, and q4 will be graded again.
+**Checking the grader:** 20 answers picked at random were labelled by hand, blind to the grader's verdicts (`eval/results/judge-20261116-134851-labels.md`). On the 18 of them graded so far, the grader agrees with the human on faithfulness 18 of 18 times and on matching the gold answer 16 of 18 times. Both disagreements (q25, q19) are answers that leave out part of the gold answer: the human marked them "partly", the grader "yes". So the grader is lenient about incomplete answers, and the gold agreement above overstates completeness (the human marked 3 of 20 answers "partly"). All 20 hand-labelled answers were faithful, so this check shows that the grader doesn't flag good answers by mistake, but not that it catches unfaithful ones.
+
+One grading bug was found and fixed. The grader first saw excerpts without their lecture titles, so it flagged an answer (q4) that correctly named its lecture as unsupported. Excerpts now carry the same lecture header the answering model sees; regraded, q4 has all 3 claims supported.
 
 ## Tests
 
