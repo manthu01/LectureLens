@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { type Course, createCourse, getConfig, listCourses } from "@/lib/api";
+import { API, type Course, createCourse, getConfig, listCourses } from "@/lib/api";
 
 export default function Home() {
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -20,7 +20,7 @@ export default function Home() {
       .catch(() => setReadOnly(false));
     listCourses()
       .then(setCourses)
-      .catch(() => setError("Could not reach the backend at localhost:8000. Is it running?"));
+      .catch(() => setError(`Could not reach the backend at ${API}. It may still be starting up; try refreshing in a few seconds.`));
   }, []);
 
   async function submit(e: React.FormEvent) {
