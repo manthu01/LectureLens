@@ -138,6 +138,17 @@ This compares dense, BM25, hybrid and hybrid + rerank retrieval and reports Reca
 | Hybrid + confidence score (live setup) | **0.96** | **1.00** | **0.98** | **0.89** | 939 ms |
 | Hybrid + confidence score, off-topic kept | 0.96 | 1.00 | 0.98 | 0.89 | 950 ms |
 
+**With 10 lectures (2026-11-23).** The demo now indexes lectures 1–10 of the playlist. The questions are unchanged (they all come from lectures 1–5), so lectures 6–10 only add distractors. Run against a local backend on CPU, so latencies aren't comparable with the table above (the cross-encoder is much slower locally). Results: `eval/results/20261123-050402.md`.
+
+| Retrieval (10 lectures) | Recall@1 | Recall@5 | MRR | Timestamp ±30s |
+|---|---|---|---|---|
+| Dense | 0.87 | 0.98 | 0.92 | 0.84 |
+| BM25 | 0.78 | 0.98 | 0.87 | 0.75 |
+| Hybrid (RRF) | **0.95** | **1.00** | **0.97** | **0.91** |
+| Hybrid + confidence score (live setup) | **0.95** | **1.00** | **0.97** | **0.91** |
+
+Twice as many lectures cost hybrid one question at rank 1 (0.96 → 0.95) and dense more (0.93 → 0.87). Three uncovered questions now pass the score gate instead of two: "deploying with Flask" (0.93, lecture 10's general talk about model deployment), "bias-variance trade-off" (0.77, as before) and "who won the 2019 Cricket World Cup" (0.06, lecture 7's T20 World Cup example of sampling bias). The LLM refuses all three, checked locally and, for Flask, on the live demo. The answer-quality results below were generated on the 5-lecture index.
+
 What this shows so far:
 
 - Hybrid retrieval beats either retriever alone at rank 1. BM25 on its own is weakest, possibly because the transcripts are machine translations with misspelt terms (not yet checked).

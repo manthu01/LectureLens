@@ -394,9 +394,9 @@ Plan: start with one course you know well (~20 lectures), screen-only first; the
 
 ## 14. Build Plan (≈4 weeks part-time)
 
-### Status (updated 2026-11-18)
+### Status (updated 2026-11-23)
 
-Live demo: https://lecturelens-app.vercel.app (5 lectures of CampusX "100 Days of Machine Learning").
+Live demo: https://lecturelens-app.vercel.app (10 lectures of CampusX "100 Days of Machine Learning"; lectures 6-10 added 2026-11-23, retrieval eval rerun: hybrid R@1 0.95, `eval/results/20261123-050402.md`).
 
 **In progress: answer-quality eval** (`eval/judge.py`). Decided: the grader is Gemini, not Claude (Claude would need paid API credits). Answers come from `gemini-3.5-flash-lite` and are graded by a different, larger model, `gemini-3.6-flash` (`3.8-flash` was the first choice but kept returning 503/504 errors on the free tier). For each answer, the grader splits it into claims and checks each one against the retrieved excerpts and against the excerpt it cites. It also checks whether the answer addresses the question and whether it agrees with the gold answer (yes/partly/no). Refusals are counted from the answer text, with no grader.
 - Done: all 66 answers generated and saved in `eval/results/judge-20261116-134851.json`. Refusals: 11/11 uncovered questions refused (9 by the score gate, 2 by the LLM: u3, u10), and 0 of the 55 answerable questions refused.
@@ -407,7 +407,7 @@ Live demo: https://lecturelens-app.vercel.app (5 lectures of CampusX "100 Days o
 **Ablations** (`backend/scripts/ablate.py`, results in README and `eval/results/ablations-20261118-024509.md`). Done: chunk length (60 s best on every metric; 120 s drops timestamp accuracy to 0.64), embedding model (keep bge-small; base-size models are no better and 5x slower to index), classifier (topic prefix +2 questions; off-topic filter no effect on this set). Whisper size (done 2026-11-19, `eval/results/ablations-20261119-132809.md`): `medium` is no better than `small` (hybrid R@1 0.91 vs 0.93, dense 0.85 vs 0.91), so the app keeps `small` and `large-v3` is skipped. History of the run, kept for reference: Whisper `medium` re-transcription (`backend/scripts/transcribe_variant.py`, writes `transcript-medium.json` per lecture, skips lectures already done). As of 2026-11-19, lectures 1 to 4 are done; lecture 5 (about 19.5 min of audio, about 25 to 30 min to transcribe) is still to do. Measured speed on this CPU: 1.3x to 1.85x real time, about 1.4 GB of RAM. Both runs so far were stopped by Claude Code because the whole system ran low on memory while the session was idle (the 2026-11-18 run left no output; the 2026-11-19 run was stopped at about 10:13 during lecture 5). To resume, close memory-heavy apps first, then run `backend/.venv/Scripts/python -u backend/scripts/transcribe_variant.py --course 1 --model medium > eval/logs/whisper-medium.log 2>&1`. For long unattended runs, start Claude Code with `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1` so it does not stop background jobs. After lecture 5, run `ablate.py --only whisper` and add the result to the README. Then decide whether `large-v3` is worth running (estimated 4 to 6 h on CPU); run it only if `medium` clearly beats `small`.
 
 Then: demo video + architecture diagram → slide/board reading.
-Small fixes: the live error message still says "localhost:8000"; the demo has only 5 lectures.
+Small fixes: done (error message shows the real backend URL; demo has 10 lectures).
 
 Recent results:
 - Retrieval (66 questions): hybrid Recall@1 0.96, Recall@5 1.00, MRR 0.98.
