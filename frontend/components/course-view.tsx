@@ -15,6 +15,8 @@ import {
   type Lecture,
   retryLecture,
   type Segment,
+  slidesUrl,
+  uploadSlides,
   type Timeline,
 } from "@/lib/api";
 import { CourseNotes, QuizPanel, SummaryPanel, TimelineBar } from "@/components/lecture-panels";
@@ -56,6 +58,7 @@ export default function CourseView() {
   const [url, setUrl] = useState("");
   const [limit, setLimit] = useState("");
   const [adding, setAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const refresh = useCallback(
     () =>
@@ -234,6 +237,38 @@ export default function CourseView() {
                 <span className="min-w-0 flex-1 truncate font-medium">
                   {lecture.number}. {lecture.title}
                 </span>
+                {lecture.slides_name && (
+                  <a
+                    href={slidesUrl(lecture.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={lecture.slides_name}
+                    className="text-muted hover:text-foreground"
+                  >
+                    Slides
+                  </a>
+                )}
+                {readOnly === false && lectureIndexed && (
+                  <label className="cursor-pointer text-muted hover:text-foreground" title="Upload this lecture's slides (.pdf or .pptx)">
+                    {uploading ? "Uploading…" : lecture.slides_name ? "Replace slides" : "Add slides"}
+                    <input
+                      type="file"
+                      accept=".pdf,.pptx"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        setUploading(true);
+                        uploadSlides(lecture.id, file)
+                          .then(refresh)
+                          .catch((err: Error) => alert(err.message))
+                          .finally(() => setUploading(false));
+                      }}
+                    />
+                  </label>
+                )}
                 {lectureIndexed &&
                   (["transcript", "summary", "quiz"] as const).map((t) => (
                     <button
@@ -297,6 +332,17 @@ export default function CourseView() {
                         )}
                         {s.topic && <span className="mr-2 font-medium">{s.topic}:</span>}
                         {s.text}
+                        {s.slide_page && s.slide_page !== shownSegments[i - 1]?.slide_page && lecture.slides_name && (
+                          <a
+                            href={slidesUrl(lecture.id, s.slide_page)}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="mt-1 mr-2 inline-block rounded bg-accent-soft px-1.5 py-0.5 text-xs text-accent hover:underline"
+                          >
+                            Slide {s.slide_page}
+                          </a>
+                        )}
                         {screen && (
                           <span className="mt-1 block whitespace-pre-line border-l-2 border-line pl-2 text-xs text-muted">
                             <span className="font-medium">On screen:</span> {screen}

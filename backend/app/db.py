@@ -33,6 +33,7 @@ class Lecture(SQLModel, table=True):
     # From the visual pipeline: screen_only | facecam_screen | facecam_only | board_close | board_far | unknown
     layout_type: str = ""
     visual_quality_score: float | None = None  # mean readability (0..1) of the frames with content
+    slides_name: str = ""  # original file name of uploaded slides (PDF/PPTX), "" if none
     created_at: datetime = Field(default_factory=_now)
 
 
@@ -48,6 +49,7 @@ def init_db() -> None:
         "summary": "TEXT NOT NULL DEFAULT ''",
         "layout_type": "TEXT NOT NULL DEFAULT ''",
         "visual_quality_score": "FLOAT",
+        "slides_name": "TEXT NOT NULL DEFAULT ''",
     }
     with engine.begin() as conn:
         existing = {c["name"] for c in inspect(conn).get_columns("lecture")}

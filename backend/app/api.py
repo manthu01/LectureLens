@@ -3,7 +3,7 @@ import time
 from collections import defaultdict, deque
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session, func, select
 
@@ -12,7 +12,7 @@ from app.db import Course, Lecture, get_session
 from app.generation import derive
 from app.generation.answer import answer_stream
 from app.ingestion.acquire import list_playlist
-from app.ingestion.pipeline import run_ingest
+from app.ingestion.pipeline import relink_slides, run_ingest
 from app.retrieval import store
 from app.retrieval.search import retrieve
 
@@ -180,6 +180,67 @@ def retry_lecture(lecture_id: int, tasks: BackgroundTasks, session: Session = De
     session.refresh(lecture)
     tasks.add_task(run_ingest, lecture.id)
     return lecture
+
+
+MAX_SLIDES_BYTES = 50 * 1024 * 1024
+
+
+def _work_dir(lecture: Lecture):
+    return settings.data_path / "courses" / str(lecture.course_id) / str(lecture.id)
+
+
+@router.post("/lectures/{lecture_id}/slides", dependencies=[Depends(writable)])
+async def upload_slides(
+    lecture_id: int, filename: str, request: Request, tasks: BackgroundTasks, session: Session = Depends(get_session)
+) -> Lecture:
+    """Upload the lecture's slides (.pdf or .pptx) as the raw request body, with the file name as a
+    query parameter. Each segment is then linked to the slide shown while it was said."""
+    from app.ingestion import slides
+
+    lecture = _get(session, Lecture, lecture_id)
+    if lecture.status not in ("indexed", "failed", "queued"):
+        raise HTTPException(409, f"Lecture is being processed ({lecture.status}); upload slides when it finishes")
+    data = await request.body()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    if len(data) > MAX_SLIDES_BYTES:
+        raise HTTPException(413, "Slides file is larger than 50 MB")
+    try:
+        deck = slides.save(_work_dir(lecture), filename, data)
+    except Exception as e:
+        raise HTTPException(400, f"Could not read the slides: {str(e)[:300]}")
+    if not any(s["text"] for s in deck):
+        raise HTTPException(400, "No text found in the slides (scanned images can't be matched yet)")
+    lecture.slides_name = filename
+    relink = lecture.status == "indexed"  # otherwise ingest picks the slides up itself
+    if relink:
+        lecture.status = "indexing"  # set now, so the UI polls until the links are in place
+    session.add(lecture)
+    session.commit()
+    session.refresh(lecture)
+    if relink:
+        tasks.add_task(relink_slides, lecture.id)
+    return lecture
+
+
+@router.get("/lectures/{lecture_id}/slides")
+def get_slides(lecture_id: int, session: Session = Depends(get_session)) -> list[dict]:
+    from app.ingestion import slides
+
+    return slides.load(_work_dir(_get(session, Lecture, lecture_id))) or []
+
+
+@router.get("/lectures/{lecture_id}/slides/file")
+def get_slides_file(lecture_id: int, session: Session = Depends(get_session)) -> FileResponse:
+    from app.ingestion import slides
+
+    path = slides.file_path(_work_dir(_get(session, Lecture, lecture_id)))
+    if path is None:
+        raise HTTPException(404, "No slides uploaded for this lecture")
+    media = "application/pdf" if path.suffix == ".pdf" else (
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation")
+    # inline, so a PDF opens in the browser tab and #page=N jumps to the slide
+    return FileResponse(path, media_type=media, content_disposition_type="inline", filename=path.name)
 
 
 @router.get("/lectures/{lecture_id}/transcript")

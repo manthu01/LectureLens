@@ -16,7 +16,12 @@ dependencies = [
 [dependency-groups]
 # Needed only to add lectures (download + transcription). Installed by default locally,
 # left out of the Docker image with `uv sync --no-default-groups`.
-ingest = ["yt-dlp", "faster-whisper"]
+ingest = [
+    "yt-dlp",
+    "faster-whisper",
+    "pypdf>=7.2.0",
+    "python-pptx>=1.0.2",
+]
 dev = ["pytest"]
 
 [tool.uv]

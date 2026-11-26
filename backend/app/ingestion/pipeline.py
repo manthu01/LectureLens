@@ -41,8 +41,37 @@ def _set(session: Session, lecture: Lecture, **fields) -> None:
     session.refresh(lecture)
 
 
+def attach_slides(chunks: list[dict], work_dir) -> list[dict]:
+    """Align uploaded slides (if any) to the chunks; without slides, chunks pass through unchanged."""
+    from app.ingestion import slides
+
+    deck = slides.load(work_dir)
+    return slides.align(chunks, deck, store.embed_dense) if deck else chunks
+
+
+def relink_slides(lecture_id: int) -> None:
+    """Re-align an indexed lecture's segments to newly uploaded slides and re-index them.
+    Works from the index itself, so no transcript or video is needed."""
+    with _lock, Session(engine) as session:
+        lecture = session.get(Lecture, lecture_id)
+        if lecture is None or lecture.status not in ("indexed", "indexing"):
+            return
+        work_dir = settings.data_path / "courses" / str(lecture.course_id) / str(lecture.id)
+        keys = ("start_sec", "end_sec", "text", "label", "topic", "visual_text")
+        chunks = [{k: s.get(k, "") for k in keys} for s in store.lecture_segments(lecture_id)]
+        try:
+            _set(session, lecture, status="indexing")
+            store.index_lecture(lecture, attach_slides(chunks, work_dir))
+            _set(session, lecture, status="indexed", error="")
+        except Exception as e:
+            log.exception("Slide alignment failed for lecture %s", lecture_id)
+            session.rollback()
+            # The old segments are still in the index; only the slide links are missing.
+            _set(session, lecture, status="indexed", error=f"Slide alignment failed: {str(e)[:300]}")
+
+
 def run_ingest(lecture_id: int) -> None:
-    """Download -> transcribe -> chunk -> classify -> read the screen -> embed -> index. Each step caches to disk, so a retry resumes."""
+    """Download -> transcribe -> chunk -> classify -> read the screen -> align slides -> embed -> index. Each step caches to disk, so a retry resumes."""
     # One lecture at a time: transcription saturates the CPU, and the lecture stays "queued" while waiting.
     with _lock, Session(engine) as session:
         lecture = session.get(Lecture, lecture_id)
@@ -76,6 +105,7 @@ def run_ingest(lecture_id: int) -> None:
                 except Exception:
                     log.warning("Visual pipeline failed for lecture %s; indexing the transcript only",
                                 lecture_id, exc_info=True)
+            chunks = attach_slides(chunks, work_dir)
             n = store.index_lecture(lecture, chunks)
             if n == 0:
                 raise RuntimeError("No speech found in this video")

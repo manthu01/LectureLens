@@ -17,7 +17,8 @@ Rules:
 - Be concise: a short paragraph or a few short lines. Plain text only, no Markdown.
 - Excerpts are automatic transcripts and may contain small transcription errors. An excerpt may
   also have an "On screen:" part: what was written on the slide, screen or board at that moment
-  (read automatically). It counts as part of that excerpt."""
+  (read automatically), and a "Slide N:" part: the text of the lecturer's uploaded slide matched to
+  that moment. Both count as part of that excerpt."""
 
 OVERVIEW_PROMPT = f"""You answer a student's question about what their lectures cover, using ONLY the lecture
 overviews provided (a summary per lecture plus timestamped key points).
@@ -94,6 +95,7 @@ def build_prompt(question: str, hits: list[dict]) -> str:
         f"[S{i}] Lecture {h['lecture_number']}: {h['lecture_title']} "
         f"({fmt_time(h['start_sec'])}-{fmt_time(h['end_sec'])})\n{h['text']}"
         + (f"\nOn screen: {h['visual_text']}" if h.get("visual_text") else "")
+        + (f"\nSlide {h['slide_page']}: {h['slide_text']}" if h.get("slide_text") else "")
         for i, h in enumerate(hits, 1)
     ]
     return "Lecture excerpts:\n\n" + "\n\n".join(blocks) + f"\n\nQuestion: {question}"
@@ -121,6 +123,7 @@ def _citation(tag: int, h: dict) -> dict:
         "end_sec": h["end_sec"],
         "snippet": h["text"][:240],
         "on_screen": (h.get("visual_text") or "")[:240],
+        "slide_page": h.get("slide_page"),
     }
 
 

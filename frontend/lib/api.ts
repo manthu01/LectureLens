@@ -13,6 +13,7 @@ export type Lecture = {
   status: "queued" | "downloading" | "transcribing" | "indexing" | "indexed" | "failed";
   error: string;
   layout_type?: string; // from the visual pipeline; "" if it never ran
+  slides_name?: string; // uploaded slides file name; "" if none
   visual_quality_score?: number | null;
 };
 
@@ -28,6 +29,7 @@ export type Segment = {
   topic: string;
   lecture_number: number;
   visual_text?: string; // what was on the slide/screen/board during this segment
+  slide_page?: number | null; // uploaded slide matched to this segment
 };
 
 export type Chapter = { title: string; label: Segment["label"]; start_sec: number; end_sec: number };
@@ -54,6 +56,7 @@ export type Citation = {
   end_sec: number;
   snippet: string;
   on_screen?: string;
+  slide_page?: number | null;
 };
 
 export type FinalAnswer = { answer: string; citations: Citation[]; supported: boolean };
@@ -86,6 +89,23 @@ export const getQuiz = (courseId: number, lectureIds: number[], n: number) =>
   req<QuizQuestion[]>(`/courses/${courseId}/quiz`, { lecture_ids: lectureIds, n });
 export const getExamHints = (courseId: number) => req<Segment[]>(`/courses/${courseId}/exam-hints`);
 export const getAnnouncements = (courseId: number) => req<Segment[]>(`/courses/${courseId}/announcements`);
+export const slidesUrl = (lectureId: number, page?: number | null) =>
+  `${API}/lectures/${lectureId}/slides/file${page ? `#page=${page}` : ""}`;
+
+/** Uploads a .pdf/.pptx as the raw body; the backend then links each segment to a slide. */
+export async function uploadSlides(lectureId: number, file: File): Promise<Lecture> {
+  const res = await fetch(`${API}/lectures/${lectureId}/slides?filename=${encodeURIComponent(file.name)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/octet-stream" },
+    body: file,
+  });
+  if (!res.ok) {
+    const detail = await res.json().then((j) => (typeof j.detail === "string" ? j.detail : "")).catch(() => "");
+    throw new Error(detail || `Upload failed (${res.status})`);
+  }
+  return res.json();
+}
+
 export const retryLecture =(lectureId: number) => req<Lecture>(`/lectures/${lectureId}/retry`, {});
 
 /** Adds a single video, or every video of a playlist when the URL has a list= parameter. */

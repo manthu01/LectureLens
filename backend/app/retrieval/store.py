@@ -72,16 +72,26 @@ def delete_lecture(lecture_id: int) -> None:
 
 def embed_text(c: dict) -> str:
     """What gets embedded for a segment: topic (so short topic queries match), the transcript and
-    the on-screen text. The payload keeps them apart."""
+    the on-screen text and the aligned uploaded slide. The payload keeps them apart."""
     parts = [f"{c['topic']}." if c.get("topic") else "", c["text"]]
     if c.get("visual_text"):
         parts.append("On screen: " + c["visual_text"])
+    if c.get("slide_text"):
+        parts.append("Slide: " + c["slide_text"])
     return " ".join(p for p in parts if p)
 
 
+def embed_dense(texts: list[str]):
+    """Unit-length dense vectors (numpy array) with the app's embedding model."""
+    import numpy as np
+
+    v = np.asarray(list(_dense().embed(texts)), dtype=float)
+    return v / np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-12)
+
+
 def index_lecture(lecture, chunks: list[dict]) -> int:
-    """Replace all segments of a lecture in the index. Chunks may carry `label`, `topic` and
-    `visual_text` (what was on screen)."""
+    """Replace all segments of a lecture in the index. Chunks may carry `label`, `topic`,
+    `visual_text` (what was on screen) and `slide_page`/`slide_text` (aligned uploaded slide)."""
     if not chunks:
         return 0
     texts = [embed_text(c) for c in chunks]
@@ -106,6 +116,8 @@ def index_lecture(lecture, chunks: list[dict]) -> int:
                 "label": c.get("label", "teaching"),
                 "topic": c.get("topic", ""),
                 "visual_text": c.get("visual_text", ""),
+                "slide_page": c.get("slide_page"),
+                "slide_text": c.get("slide_text", ""),
             },
         )
         for i, (c, d, s) in enumerate(zip(chunks, dense, sparse))

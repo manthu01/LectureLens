@@ -1,0 +1,818 @@
+{
+ "frames": [
+  {
+   "file": "00005.jpg",
+   "start_sec": 0.0,
+   "end_sec": 5.005,
+   "slide": 35,
+   "text": "6.0001, Fall 2016\nIntroduction to Computer Science and Programming in Python\nAna Bell\nLecture 1: What is Computation?"
+  },
+  {
+   "file": "00053.jpg",
+   "start_sec": 5.005,
+   "end_sec": 53.8538,
+   "slide": 1,
+   "text": "WELCOME!\n(download slides and .py files to follow along!)\n6.0001 LECTURE 1"
+  },
+  {
+   "file": "00082.jpg",
+   "start_sec": 53.8538,
+   "end_sec": 82.4824,
+   "slide": 2,
+   "text": "TODAY\n- course info\n- what is computation\n- python basics\n- mathematical operations\n- python variables and types\n- NOTE: slides and code files up before each lecture\n  - highly encourage you to downlo"
+  },
+  {
+   "file": "00132.jpg",
+   "start_sec": 82.4824,
+   "end_sec": 132.59913333333333,
+   "slide": 6,
+   "text": "FAST PACED COURSE\n- Position yourself to succeed!\n  - read psets when they come out and come back to them later\n  - use late days in emergency situations\n- New to programming? PRACTICE. PRACTICE? PRAC"
+  },
+  {
+   "file": "00225.jpg",
+   "start_sec": 132.59913333333333,
+   "end_sec": 225.49193333333332,
+   "slide": 7,
+   "text": "[diagram: PROBLEM SOLVING connected to KNOWLEDGE OF CONCEPTS and PROGRAMMING SKILL]"
+  },
+  {
+   "file": "00285.jpg",
+   "start_sec": 225.49193333333332,
+   "end_sec": 285.5853,
+   "slide": 8,
+   "text": "TOPICS\n- represent knowledge with data structures\n- iteration and recursion as computational metaphors\n- abstraction of procedures and data types\n- organize and modularize systems using object classes"
+  },
+  {
+   "file": "00297.jpg",
+   "start_sec": 285.5853,
+   "end_sec": 297.3971,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00349.jpg",
+   "start_sec": 297.3971,
+   "end_sec": 349.4157333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00359.jpg",
+   "start_sec": 349.4157333333333,
+   "end_sec": 359.4257333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00384.jpg",
+   "start_sec": 359.4257333333333,
+   "end_sec": 384.55083333333334,
+   "slide": 8,
+   "text": "TOPICS\n- represent knowledge with data structures\n- iteration and recursion as computational metaphors\n- abstraction of procedures and data types\n- organize and modularize systems using object classes"
+  },
+  {
+   "file": "00426.jpg",
+   "start_sec": 384.55083333333334,
+   "end_sec": 426.09233333333333,
+   "slide": 9,
+   "text": "WHAT DOES A COMPUTER DO\n- Fundamentally:\n  - performs calculations\n  - a billion calculations per second!\n  - remembers results\n  - 100s of gigabytes of storage!\n- What kinds of calculations?\n  - buil"
+  },
+  {
+   "file": "00502.jpg",
+   "start_sec": 426.09233333333333,
+   "end_sec": 502.06823333333335,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00528.jpg",
+   "start_sec": 502.06823333333335,
+   "end_sec": 528.7615666666667,
+   "slide": 10,
+   "text": "TYPES OF KNOWLEDGE\ndeclarative knowledge is statements of fact.\nimperative knowledge is a recipe or \"how-to\"."
+  },
+  {
+   "file": "00593.jpg",
+   "start_sec": 528.7615666666667,
+   "end_sec": 593.8265666666666,
+   "slide": 10,
+   "text": "TYPES OF KNOWLEDGE\ndeclarative knowledge is statements of fact.\n- someone will win a Google Cardboard before class ends\nimperative knowledge is a recipe or \"how-to\".\n1) Students sign up at http://bit."
+  },
+  {
+   "file": "00674.jpg",
+   "start_sec": 593.8265666666666,
+   "end_sec": 674.8074666666666,
+   "slide": 10,
+   "text": "TYPES OF KNOWLEDGE\ndeclarative knowledge is statements of fact.\n- someone will win a Google Cardboard before class ends\nimperative knowledge is a recipe or \"how-to\".\n1) Students sign up at http://bit."
+  },
+  {
+   "file": "00689.jpg",
+   "start_sec": 674.8074666666666,
+   "end_sec": 689.8224666666666,
+   "slide": null,
+   "text": "In [85]: import random"
+  },
+  {
+   "file": "00699.jpg",
+   "start_sec": 689.8224666666666,
+   "end_sec": 699.8324666666666,
+   "slide": null,
+   "text": "In [85]: import random\nIn [86]: random.randint(16, 272"
+  },
+  {
+   "file": "00772.jpg",
+   "start_sec": 699.8324666666666,
+   "end_sec": 772.2715,
+   "slide": 11,
+   "text": "A NUMERICAL EXAMPLE\nsquare root of a number x is y such that y*y = x\nrecipe for deducing square root of a number x (16)\n1) Start with a guess, g\n2) If g*g is close enough to x, stop and say g is the a"
+  },
+  {
+   "file": "00857.jpg",
+   "start_sec": 772.2715,
+   "end_sec": 857.7902666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00867.jpg",
+   "start_sec": 857.7902666666666,
+   "end_sec": 867.8002666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00928.jpg",
+   "start_sec": 867.8002666666666,
+   "end_sec": 928.7945333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00978.jpg",
+   "start_sec": 928.7945333333333,
+   "end_sec": 978.5776,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01008.jpg",
+   "start_sec": 978.5776,
+   "end_sec": 1008.9079,
+   "slide": 13,
+   "text": "COMPUTERS ARE MACHINES\n\nhow to capture a recipe in a mechanical process\n\nfixed program computer\n- calculator\n\nstored program computer\n- machine stores and executes instructions\n\n[diagram: an image of "
+  },
+  {
+   "file": "01056.jpg",
+   "start_sec": 1008.9079,
+   "end_sec": 1056.1884666666667,
+   "slide": null,
+   "text": "BASIC MACHINE ARCHITECTURE\n\n[diagram: block diagram showing MEMORY connected via arrows to ARITHMETIC LOGIC UNIT (do primitive ops) inside a central processor, with INPUT and OUTPUT blocks below]"
+  },
+  {
+   "file": "01073.jpg",
+   "start_sec": 1056.1884666666667,
+   "end_sec": 1073.6392333333333,
+   "slide": 14,
+   "text": "BASIC MACHINE ARCHITECTURE\nMEMORY\nARITHMETIC LOGIC UNIT\ndo primitive ops\nINPUT\nOUTPUT"
+  },
+  {
+   "file": "01105.jpg",
+   "start_sec": 1073.6392333333333,
+   "end_sec": 1105.1373666666666,
+   "slide": 14,
+   "text": "BASIC MACHINE ARCHITECTURE\nMEMORY\nCONTROL UNIT\nprogram counter\nARITHMETIC LOGIC UNIT\ndo primitive ops\nINPUT\nOUTPUT"
+  },
+  {
+   "file": "01155.jpg",
+   "start_sec": 1105.1373666666666,
+   "end_sec": 1155.3542,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01166.jpg",
+   "start_sec": 1155.3542,
+   "end_sec": 1166.7656,
+   "slide": 14,
+   "text": "BASIC MACHINE ARCHITECTURE\nMEMORY\nCONTROL UNIT\nprogram counter\nARITHMETIC LOGIC UNIT\ndo primitive ops\nINPUT\nOUTPUT"
+  },
+  {
+   "file": "01206.jpg",
+   "start_sec": 1166.7656,
+   "end_sec": 1206.4719333333333,
+   "slide": 15,
+   "text": "STORED PROGRAM COMPUTER\nsequence of instructions stored inside computer\n- built from predefined set of primitive instructions\n1) arithmetic and logic\n2) simple tests\n3) moving data\nspecial program (in"
+  },
+  {
+   "file": "01302.jpg",
+   "start_sec": 1206.4719333333333,
+   "end_sec": 1302.1675333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01316.jpg",
+   "start_sec": 1302.1675333333333,
+   "end_sec": 1316.315,
+   "slide": 17,
+   "text": "CREATING RECIPES a programming language provides a set of primitive operations expressions are complex but legal combinations of primitives in a programming language expressions and computations have "
+  },
+  {
+   "file": "01358.jpg",
+   "start_sec": 1316.315,
+   "end_sec": 1358.6573,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01371.jpg",
+   "start_sec": 1358.6573,
+   "end_sec": 1371.2699,
+   "slide": 19,
+   "text": "ASPECTS OF LANGUAGES syntax English: \"cat dog boy\" -> not syntactically valid \"cat hugs boy\" -> syntactically valid programming language: \"hi\"5 -> not syntactically valid 3.2*5 -> syntactically valid"
+  },
+  {
+   "file": "01528.jpg",
+   "start_sec": 1371.2699,
+   "end_sec": 1528.3935333333334,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01538.jpg",
+   "start_sec": 1528.3935333333334,
+   "end_sec": 1538.4035333333334,
+   "slide": null,
+   "text": "[equation: l_1 sin(theta_1) + l_2 sin(theta_1 + theta_2)]"
+  },
+  {
+   "file": "01557.jpg",
+   "start_sec": 1538.4035333333334,
+   "end_sec": 1557.0221333333334,
+   "slide": 21,
+   "text": "ASPECTS OF LANGUAGES semantics is the meaning associated with a syntactically correct string of symbols with no static semantic errors English: can have many meanings \"Flying planes can be dangerous\" "
+  },
+  {
+   "file": "01571.jpg",
+   "start_sec": 1557.0221333333334,
+   "end_sec": 1571.6033666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01585.jpg",
+   "start_sec": 1571.6033666666667,
+   "end_sec": 1585.0835,
+   "slide": null,
+   "text": "In [85]: import random\nIn [86]: random.randint(16, 272)\nOut[86]: 75"
+  },
+  {
+   "file": "01595.jpg",
+   "start_sec": 1585.0835,
+   "end_sec": 1595.0935,
+   "slide": null,
+   "text": "In [85]: import random\nIn [86]: random.randint(16, 272)\nOut[86]: 75\nIn [87]: 3\"hi\"\nFile \"<ipython-input-87-5ad35e9bc1dc>\", line 1\n    3\"hi\"\n        ^\nSyntaxError: invalid syntax"
+  },
+  {
+   "file": "01628.jpg",
+   "start_sec": 1595.0935,
+   "end_sec": 1628.1598666666666,
+   "slide": 22,
+   "text": "WHERE THINGS GO WRONG\n- syntactic errors\n  - common and easily caught\n- static semantic errors\n  - some languages check for these before running program\n  - can cause unpredictable behavior\n- no seman"
+  },
+  {
+   "file": "01706.jpg",
+   "start_sec": 1628.1598666666666,
+   "end_sec": 1706.6382666666666,
+   "slide": 23,
+   "text": "PYTHON PROGRAMS\n- a program is a sequence of definitions and commands\n  - definitions evaluated\n  - commands executed by Python interpreter in a shell\n- commands (statements) instruct interpreter to d"
+  },
+  {
+   "file": "01727.jpg",
+   "start_sec": 1706.6382666666666,
+   "end_sec": 1727.0253,
+   "slide": null,
+   "text": "In [87]: 3\"hi\"\nFile \"<ipython-input-87-5ad35e9bc1dc>\", line 1\n    3\"hi\"\n        ^\nSyntaxError: invalid syntax\nIn [88]: 2+4\nOut[88]: 6"
+  },
+  {
+   "file": "01742.jpg",
+   "start_sec": 1727.0253,
+   "end_sec": 1742.0403,
+   "slide": null,
+   "text": "12+4\n2\nSyntaxError: invalid syntax\nIn [87]:\nIn [88]: 2+4\nOut[88]: 6\nIn [89]: runfile('C:/Users/Ana/.spyder2-py3/temp.py', wdir='C:/Users/Ana/.spyder2-py3')"
+  },
+  {
+   "file": "01772.jpg",
+   "start_sec": 1742.0403,
+   "end_sec": 1772.0703,
+   "slide": 24,
+   "text": "OBJECTS\n- programs manipulate data objects\n- objects have a type that defines the kinds of things programs can do to them\n  - Ana is a human so she can walk, speak English, etc.\n  - Chewbacca is a woo"
+  },
+  {
+   "file": "01925.jpg",
+   "start_sec": 1772.0703,
+   "end_sec": 1925.0564666666667,
+   "slide": 26,
+   "text": "TYPE CONVERSIONS (CAST)\n- can convert object of one type to another\n- float(3) converts integer 3 to float 3.0\n- int(3.9) truncates float 3.9 to integer 3"
+  },
+  {
+   "file": "01959.jpg",
+   "start_sec": 1925.0564666666667,
+   "end_sec": 1959.958,
+   "slide": 27,
+   "text": "PRINTING TO CONSOLE\n- to show output from code to a user, use print command\nIn [11]: 3+2\nOut[11]: 5\nIn [12]: print(3+2)\n5"
+  },
+  {
+   "file": "02004.jpg",
+   "start_sec": 1959.958,
+   "end_sec": 2004.6693333333333,
+   "slide": null,
+   "text": "13+2\n2\nIn [87]:\nIn [88]: 2+4\nOut[88]: 6\nIn [89]: runfile('C:/Users/Ana/.spyder2-py3/temp.py', wdir='C:/Users/Ana/.spyder2-py3')\nIn [90]: runfile('C:/Users/Ana/.spyder2-py3/temp.py', wdir='C:/Users/Ana"
+  },
+  {
+   "file": "02029.jpg",
+   "start_sec": 2004.6693333333333,
+   "end_sec": 2029.6943333333334,
+   "slide": null,
+   "text": "13+2\n2 print(3+2)\nIn [87]:\nIn [88]: 2+4\nOut[88]: 6\nIn [89]: runfile('C:/Users/Ana/.spyder2-py3/temp.py', wdir='C:/Users/Ana/.spyder2-py3')\nIn [90]: runfile('C:/Users/Ana/.spyder2-py3/temp.py', wdir='C"
+  },
+  {
+   "file": "02053.jpg",
+   "start_sec": 2029.6943333333334,
+   "end_sec": 2053.1177333333335,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02061.jpg",
+   "start_sec": 2053.1177333333335,
+   "end_sec": 2061.4927666666667,
+   "slide": 28,
+   "text": "EXPRESSIONS\n- combine objects and operators to form expressions\n- an expression has a value, which has a type\n- syntax for a simple expression\n<object> <operator> <object>"
+  },
+  {
+   "file": "02102.jpg",
+   "start_sec": 2061.4927666666667,
+   "end_sec": 2102.667233333333,
+   "slide": 29,
+   "text": "OPERATORS ON ints and floats\ni+j -> the sum [if both are ints, result is int; if either or both are floats, result is float]\ni-j -> the difference [if both are ints, result is int; if either or both a"
+  },
+  {
+   "file": "02216.jpg",
+   "start_sec": 2102.667233333333,
+   "end_sec": 2216.4475666666667,
+   "slide": 31,
+   "text": "BINDING VARIABLES AND VALUES\n- equal sign is an assignment of a value to a variable name\npi = 3.14159\npi_approx = 22/7\n- value stored in computer memory\n- an assignment binds name to value\n- retrieve "
+  },
+  {
+   "file": "02260.jpg",
+   "start_sec": 2216.4475666666667,
+   "end_sec": 2260.6584,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02281.jpg",
+   "start_sec": 2260.6584,
+   "end_sec": 2281.1789,
+   "slide": 32,
+   "text": "ABSTRACTING EXPRESSIONS\n- why give names to values of expressions?\n- to reuse names instead of values\n- easier to change code later\npi = 3.14159\nradius = 2.2\narea = pi*(radius**2)"
+  },
+  {
+   "file": "02326.jpg",
+   "start_sec": 2281.1789,
+   "end_sec": 2326.4908333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02375.jpg",
+   "start_sec": 2326.4908333333333,
+   "end_sec": 2375.1394333333333,
+   "slide": null,
+   "text": "PROGRAMMING vs MATH\nin programming, you do not \"solve for x\"\npi = 3.14159\nradius = 2.2\n# area of circle\narea = pi*(radius**2)\nradius = radius + 1\n* an assignment\n* expression on the right, evaluated t"
+  },
+  {
+   "file": "02397.jpg",
+   "start_sec": 2375.1394333333333,
+   "end_sec": 2397.6285666666668,
+   "slide": 34,
+   "text": "CHANGING BINDINGS\ncan re-bind variable names using new assignment statements\nprevious value may still stored in memory but lost the handle for it\nvalue for area does not change until you tell the comp"
+  },
+  {
+   "file": "02489.jpg",
+   "start_sec": 2397.6285666666668,
+   "end_sec": 2489.320166666667,
+   "slide": null,
+   "text": "First"
+  },
+  {
+   "file": "02514.jpg",
+   "start_sec": 2489.320166666667,
+   "end_sec": 2514.3451666666665,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02529.jpg",
+   "start_sec": 2514.3451666666665,
+   "end_sec": 2529.360166666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02545.jpg",
+   "start_sec": 2529.360166666667,
+   "end_sec": 2545.1759666666667,
+   "slide": 34,
+   "text": "CHANGING BINDINGS\n- can re-bind variable names using new assignment statements\n- previous value may still stored in memory but lost the handle for it\n- value for area does not change until you tell th"
+  },
+  {
+   "file": "02583.jpg",
+   "start_sec": 2545.1759666666667,
+   "end_sec": 2583.2139666666667,
+   "slide": null,
+   "text": "Sources of content (c) the respective copyright holders, all rights reserved, excluded from our Creative Commons license. For more information, see http://ocw.mit.edu/fairuse\nImages of equations (c) S"
+  }
+ ],
+ "segments": [
+  {
+   "start_sec": 0.34,
+   "end_sec": 60.57,
+   "gold": 1,
+   "transcript_path": 35,
+   "best_each": 35,
+   "with_visual": 2
+  },
+  {
+   "start_sec": 58.73,
+   "end_sec": 119.77,
+   "gold": 6,
+   "transcript_path": 2,
+   "best_each": 2,
+   "with_visual": 2
+  },
+  {
+   "start_sec": 117.81,
+   "end_sec": 177.85,
+   "gold": 7,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 6
+  },
+  {
+   "start_sec": 174.57,
+   "end_sec": 236.93,
+   "gold": 7,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 8
+  },
+  {
+   "start_sec": 234.33,
+   "end_sec": 295.29,
+   "gold": 8,
+   "transcript_path": 5,
+   "best_each": 5,
+   "with_visual": 8
+  },
+  {
+   "start_sec": 293.21,
+   "end_sec": 353.93,
+   "gold": null,
+   "transcript_path": 5,
+   "best_each": 4,
+   "with_visual": 9
+  },
+  {
+   "start_sec": 350.57,
+   "end_sec": 413.49,
+   "gold": 9,
+   "transcript_path": 5,
+   "best_each": 5,
+   "with_visual": 9
+  },
+  {
+   "start_sec": 410.09,
+   "end_sec": 472.21,
+   "gold": 9,
+   "transcript_path": 9,
+   "best_each": 9,
+   "with_visual": 9
+  },
+  {
+   "start_sec": 467.77,
+   "end_sec": 528.17,
+   "gold": 10,
+   "transcript_path": 9,
+   "best_each": 9,
+   "with_visual": 9
+  },
+  {
+   "start_sec": 524.29,
+   "end_sec": 587.21,
+   "gold": 10,
+   "transcript_path": 10,
+   "best_each": 10,
+   "with_visual": 10
+  },
+  {
+   "start_sec": 583.77,
+   "end_sec": 645.65,
+   "gold": 10,
+   "transcript_path": 10,
+   "best_each": 10,
+   "with_visual": 10
+  },
+  {
+   "start_sec": 642.29,
+   "end_sec": 702.37,
+   "gold": 10,
+   "transcript_path": 11,
+   "best_each": 11,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 700.77,
+   "end_sec": 761.69,
+   "gold": 11,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 759.05,
+   "end_sec": 819.49,
+   "gold": 11,
+   "transcript_path": 11,
+   "best_each": 11,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 816.81,
+   "end_sec": 879.2,
+   "gold": null,
+   "transcript_path": 11,
+   "best_each": 11,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 876.04,
+   "end_sec": 938.77,
+   "gold": null,
+   "transcript_path": 12,
+   "best_each": 12,
+   "with_visual": 12
+  },
+  {
+   "start_sec": 935.69,
+   "end_sec": 996.57,
+   "gold": 13,
+   "transcript_path": 13,
+   "best_each": 13,
+   "with_visual": 13
+  },
+  {
+   "start_sec": 993.21,
+   "end_sec": 1054.62,
+   "gold": 13,
+   "transcript_path": 13,
+   "best_each": 13,
+   "with_visual": 13
+  },
+  {
+   "start_sec": 1051.46,
+   "end_sec": 1113.25,
+   "gold": 14,
+   "transcript_path": 14,
+   "best_each": 14,
+   "with_visual": 14
+  },
+  {
+   "start_sec": 1110.93,
+   "end_sec": 1172.73,
+   "gold": 14,
+   "transcript_path": 15,
+   "best_each": 15,
+   "with_visual": 15
+  },
+  {
+   "start_sec": 1169.61,
+   "end_sec": 1230.53,
+   "gold": 15,
+   "transcript_path": 15,
+   "best_each": 15,
+   "with_visual": 15
+  },
+  {
+   "start_sec": 1228.81,
+   "end_sec": 1289.77,
+   "gold": null,
+   "transcript_path": 16,
+   "best_each": 16,
+   "with_visual": 16
+  },
+  {
+   "start_sec": 1286.85,
+   "end_sec": 1350.72,
+   "gold": 17,
+   "transcript_path": 17,
+   "best_each": 17,
+   "with_visual": 17
+  },
+  {
+   "start_sec": 1345.08,
+   "end_sec": 1408.0,
+   "gold": 19,
+   "transcript_path": 19,
+   "best_each": 19,
+   "with_visual": 19
+  },
+  {
+   "start_sec": 1401.98,
+   "end_sec": 1462.3,
+   "gold": null,
+   "transcript_path": 20,
+   "best_each": 20,
+   "with_visual": 20
+  },
+  {
+   "start_sec": 1457.38,
+   "end_sec": 1520.01,
+   "gold": null,
+   "transcript_path": 21,
+   "best_each": 21,
+   "with_visual": 21
+  },
+  {
+   "start_sec": 1516.38,
+   "end_sec": 1578.73,
+   "gold": 21,
+   "transcript_path": 21,
+   "best_each": 21,
+   "with_visual": 21
+  },
+  {
+   "start_sec": 1576.01,
+   "end_sec": 1636.26,
+   "gold": 22,
+   "transcript_path": 22,
+   "best_each": 22,
+   "with_visual": 22
+  },
+  {
+   "start_sec": 1633.1,
+   "end_sec": 1697.38,
+   "gold": 23,
+   "transcript_path": 22,
+   "best_each": 22,
+   "with_visual": 23
+  },
+  {
+   "start_sec": 1692.02,
+   "end_sec": 1749.86,
+   "gold": 23,
+   "transcript_path": 23,
+   "best_each": 23,
+   "with_visual": 23
+  },
+  {
+   "start_sec": 1744.86,
+   "end_sec": 1806.68,
+   "gold": 26,
+   "transcript_path": 24,
+   "best_each": 24,
+   "with_visual": 24
+  },
+  {
+   "start_sec": 1804.0,
+   "end_sec": 1865.82,
+   "gold": 26,
+   "transcript_path": 24,
+   "best_each": 24,
+   "with_visual": 26
+  },
+  {
+   "start_sec": 1863.24,
+   "end_sec": 1910.02,
+   "gold": 26,
+   "transcript_path": 25,
+   "best_each": 25,
+   "with_visual": 26
+  },
+  {
+   "start_sec": 1907.42,
+   "end_sec": 1968.4,
+   "gold": 27,
+   "transcript_path": 26,
+   "best_each": 26,
+   "with_visual": 26
+  },
+  {
+   "start_sec": 1965.2,
+   "end_sec": 2027.76,
+   "gold": null,
+   "transcript_path": 27,
+   "best_each": 27,
+   "with_visual": 27
+  },
+  {
+   "start_sec": 2022.76,
+   "end_sec": 2083.44,
+   "gold": 29,
+   "transcript_path": 28,
+   "best_each": 28,
+   "with_visual": 29
+  },
+  {
+   "start_sec": 2078.68,
+   "end_sec": 2126.22,
+   "gold": 29,
+   "transcript_path": 29,
+   "best_each": 29,
+   "with_visual": 29
+  },
+  {
+   "start_sec": 2124.78,
+   "end_sec": 2186.56,
+   "gold": 31,
+   "transcript_path": 30,
+   "best_each": 30,
+   "with_visual": 31
+  },
+  {
+   "start_sec": 2184.76,
+   "end_sec": 2245.99,
+   "gold": 31,
+   "transcript_path": 31,
+   "best_each": 31,
+   "with_visual": 31
+  },
+  {
+   "start_sec": 2242.83,
+   "end_sec": 2304.47,
+   "gold": 32,
+   "transcript_path": 32,
+   "best_each": 32,
+   "with_visual": 32
+  },
+  {
+   "start_sec": 2300.63,
+   "end_sec": 2347.51,
+   "gold": null,
+   "transcript_path": 33,
+   "best_each": 33,
+   "with_visual": 33
+  },
+  {
+   "start_sec": 2343.73,
+   "end_sec": 2404.99,
+   "gold": 34,
+   "transcript_path": 31,
+   "best_each": 31,
+   "with_visual": 34
+  },
+  {
+   "start_sec": 2401.31,
+   "end_sec": 2466.06,
+   "gold": null,
+   "transcript_path": 34,
+   "best_each": 34,
+   "with_visual": 34
+  },
+  {
+   "start_sec": 2461.06,
+   "end_sec": 2525.88,
+   "gold": null,
+   "transcript_path": 34,
+   "best_each": 34,
+   "with_visual": 34
+  },
+  {
+   "start_sec": 2520.94,
+   "end_sec": 2576.34,
+   "gold": 34,
+   "transcript_path": 34,
+   "best_each": 34,
+   "with_visual": 34
+  }
+ ],
+ "results": {
+  "transcript, path (app without visual)": {
+   "exact": 0.4857142857142857,
+   "within_1": 0.7714285714285715
+  },
+  "transcript, best slide per segment": {
+   "exact": 0.4857142857142857,
+   "within_1": 0.7714285714285715
+  },
+  "transcript, dense only, path": {
+   "exact": 0.42857142857142855,
+   "within_1": 0.7142857142857143
+  },
+  "transcript + on-screen text, path (app)": {
+   "exact": 0.7428571428571429,
+   "within_1": 0.9428571428571428
+  }
+ }
+}

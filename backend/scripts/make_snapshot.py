@@ -56,7 +56,16 @@ def main() -> None:
     src.close()
     dst.close()
 
-    print(f"Snapshot written to {OUT}: {lectures} indexed lectures, {count} segments")
+    # Uploaded slides: the file (served at /lectures/{id}/slides/file) and its extracted text.
+    decks = 0
+    for f in (settings.data_path / "courses").glob("*/*/slides.*"):
+        if f.suffix in (".pdf", ".pptx", ".json"):
+            dest = OUT / f.relative_to(settings.data_path)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, dest)
+            decks += f.suffix != ".json"
+
+    print(f"Snapshot written to {OUT}: {lectures} indexed lectures, {count} segments, {decks} slide deck(s)")
     if missing:
         print(f"Note: {missing} lecture(s) have no cached summary; they will be generated on first view.")
 
