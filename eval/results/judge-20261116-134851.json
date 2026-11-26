@@ -10,20 +10,20 @@
     "unanswerable_refused_by_gate": 9,
     "unanswerable_refused_by_llm": 2,
     "unanswerable_answered": [],
-    "n_judged": 53,
+    "n_judged": 55,
     "n_to_judge": 55,
-    "n_claims": 116,
-    "claim_support": 0.9913793103448276,
-    "citation_support": 0.9827586206896551,
-    "fully_faithful_answers": 0.9811320754716981,
+    "n_claims": 122,
+    "claim_support": 0.9918032786885246,
+    "citation_support": 0.9836065573770492,
+    "fully_faithful_answers": 0.9818181818181818,
     "unfaithful": [
       "q35"
     ],
     "answers_question": 1.0,
     "matches_reference": {
-      "yes": 0.9811320754716981,
+      "yes": 0.9818181818181818,
       "partly": 0.0,
-      "no": 0.018867924528301886
+      "no": 0.01818181818181818
     },
     "reference_no": [
       "q36"
@@ -4740,7 +4740,48 @@
       "answer": "Online learning carries two big problems and risks [S1][S3]. First, it is tricky and unstable because you are learning on the fly on the server, dealing with variables like the learning rate, server data processing, and incoming data speed, without enterprise-grade assurance tools [S1]. Second, it is risky because a model's behavior depends on incoming data [S1][S2]. If the incoming data gets messed up—such as through a spammer, a hacked server, or wrong requests—the model will become biased by taking in the wrong things, requiring you to immediately remove the model from the server [S2].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Online learning carries two big problems and risks.",
+            "cited": [
+              "S1",
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "First, it is tricky and unstable because you are learning on the fly on the server, dealing with variables like the learning rate, server data processing, and incoming data speed, without enterprise-grade assurance tools.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Second, it is risky because a model's behavior depends on incoming data.",
+            "cited": [
+              "S1",
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "If the incoming data gets messed up—such as through a spammer, a hacked server, or wrong requests—the model will become biased by taking in the wrong things, requiring you to immediately remove the model from the server.",
+            "cited": [
+              "S2"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q55",
@@ -4800,7 +4841,30 @@
       "answer": "A dog-versus-cat image classifier should use batch learning because there is no concept drift over time (since dogs and cats will live for 10 years and their concept does not change) [S1].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "A dog-versus-cat image classifier should use batch learning.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Batch learning is appropriate for this task because there is no concept drift over time, as dogs and cats remain the same over years.",
+            "cited": [
+              "S1"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "u3",
