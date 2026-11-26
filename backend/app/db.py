@@ -30,6 +30,9 @@ class Lecture(SQLModel, table=True):
     status: str = "queued"
     error: str = ""
     summary: str = ""  # JSON: {summary, key_points: [{text, start_sec}]}
+    # From the visual pipeline: screen_only | facecam_screen | facecam_only | board_close | board_far | unknown
+    layout_type: str = ""
+    visual_quality_score: float | None = None  # mean readability (0..1) of the frames with content
     created_at: datetime = Field(default_factory=_now)
 
 
@@ -41,9 +44,16 @@ def init_db() -> None:
     settings.data_path.mkdir(parents=True, exist_ok=True)
     SQLModel.metadata.create_all(engine)
     # create_all never alters existing tables, so add columns introduced after the first release.
+    added = {
+        "summary": "TEXT NOT NULL DEFAULT ''",
+        "layout_type": "TEXT NOT NULL DEFAULT ''",
+        "visual_quality_score": "FLOAT",
+    }
     with engine.begin() as conn:
-        if "summary" not in {c["name"] for c in inspect(conn).get_columns("lecture")}:
-            conn.execute(text("ALTER TABLE lecture ADD COLUMN summary TEXT NOT NULL DEFAULT ''"))
+        existing = {c["name"] for c in inspect(conn).get_columns("lecture")}
+        for name, ddl in added.items():
+            if name not in existing:
+                conn.execute(text(f"ALTER TABLE lecture ADD COLUMN {name} {ddl}"))
 
 
 def get_session():

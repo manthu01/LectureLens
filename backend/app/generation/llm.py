@@ -35,9 +35,23 @@ def stream_completion(system: str, prompt: str) -> Iterator[str]:
             yield chunk.text
 
 
-def complete_json(system: str, prompt: str, schema: dict, attempts: int = 3):
-    """One-shot completion constrained to a JSON schema. Retries on rate limits/overload."""
+class Blocked(RuntimeError):
+    """The model returned no text on purpose (e.g. finish reason RECITATION or SAFETY). Retrying
+    the same input gives the same result, so this is raised at once."""
+
+
+def complete_json(system: str, prompt: str, schema: dict, attempts: int = 3, images: list[bytes] = (),
+                  model: str = ""):
+    """One-shot completion constrained to a JSON schema. Retries on rate limits/overload.
+
+    `images` (JPEG bytes) go before the prompt, each preceded by its number as "[i]";
+    `model` overrides LLM_MODEL."""
     from google.genai import types
+
+    contents: list = []
+    for i, b in enumerate(images):
+        contents += [f"[{i}]", types.Part.from_bytes(data=b, mime_type="image/jpeg")]
+    contents.append(prompt)
 
     config = types.GenerateContentConfig(
         system_instruction=system,
@@ -47,8 +61,16 @@ def complete_json(system: str, prompt: str, schema: dict, attempts: int = 3):
     )
     for attempt in range(attempts):
         try:
-            res = _client().models.generate_content(model=settings.llm_model, contents=prompt, config=config)
+            res = _client().models.generate_content(
+                model=model or settings.llm_model, contents=contents, config=config
+            )
+            if res.text is None and res.candidates and res.candidates[0].finish_reason:
+                reason = str(res.candidates[0].finish_reason)
+                if not reason.endswith(("STOP", "MAX_TOKENS")):
+                    raise Blocked(reason)
             return json.loads(res.text)
+        except Blocked:
+            raise
         except Exception:
             if attempt == attempts - 1:
                 raise

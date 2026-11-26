@@ -70,12 +70,21 @@ def delete_lecture(lecture_id: int) -> None:
         )
 
 
+def embed_text(c: dict) -> str:
+    """What gets embedded for a segment: topic (so short topic queries match), the transcript and
+    the on-screen text. The payload keeps them apart."""
+    parts = [f"{c['topic']}." if c.get("topic") else "", c["text"]]
+    if c.get("visual_text"):
+        parts.append("On screen: " + c["visual_text"])
+    return " ".join(p for p in parts if p)
+
+
 def index_lecture(lecture, chunks: list[dict]) -> int:
-    """Replace all segments of a lecture in the index. Chunks may carry `label` and `topic`."""
+    """Replace all segments of a lecture in the index. Chunks may carry `label`, `topic` and
+    `visual_text` (what was on screen)."""
     if not chunks:
         return 0
-    # The topic is embedded with the text so short topic queries match; payload keeps raw text.
-    texts = [f"{c['topic']}. {c['text']}" if c.get("topic") else c["text"] for c in chunks]
+    texts = [embed_text(c) for c in chunks]
     dense = [v.tolist() for v in _dense().embed(texts)]
     sparse = [_sv(e) for e in _sparse().embed(texts)]
     _ensure_collection(len(dense[0]))
@@ -96,6 +105,7 @@ def index_lecture(lecture, chunks: list[dict]) -> int:
                 "text": c["text"],
                 "label": c.get("label", "teaching"),
                 "topic": c.get("topic", ""),
+                "visual_text": c.get("visual_text", ""),
             },
         )
         for i, (c, d, s) in enumerate(zip(chunks, dense, sparse))

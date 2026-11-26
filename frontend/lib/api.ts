@@ -12,6 +12,8 @@ export type Lecture = {
   duration_sec: number;
   status: "queued" | "downloading" | "transcribing" | "indexing" | "indexed" | "failed";
   error: string;
+  layout_type?: string; // from the visual pipeline; "" if it never ran
+  visual_quality_score?: number | null;
 };
 
 export type CourseDetail = Course & { lectures: Lecture[] };
@@ -25,6 +27,7 @@ export type Segment = {
   label: "teaching" | "off_topic" | "admin" | "exam_hint";
   topic: string;
   lecture_number: number;
+  visual_text?: string; // what was on the slide/screen/board during this segment
 };
 
 export type Chapter = { title: string; label: Segment["label"]; start_sec: number; end_sec: number };
@@ -50,6 +53,7 @@ export type Citation = {
   start_sec: number;
   end_sec: number;
   snippet: string;
+  on_screen?: string;
 };
 
 export type FinalAnswer = { answer: string; citations: Citation[]; supported: boolean };

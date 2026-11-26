@@ -42,7 +42,7 @@ def _set(session: Session, lecture: Lecture, **fields) -> None:
 
 
 def run_ingest(lecture_id: int) -> None:
-    """Download -> transcribe -> chunk -> embed -> index. Each step caches to disk, so a retry resumes."""
+    """Download -> transcribe -> chunk -> classify -> read the screen -> embed -> index. Each step caches to disk, so a retry resumes."""
     # One lecture at a time: transcription saturates the CPU, and the lecture stays "queued" while waiting.
     with _lock, Session(engine) as session:
         lecture = session.get(Lecture, lecture_id)
@@ -67,6 +67,15 @@ def run_ingest(lecture_id: int) -> None:
             chunks = chunk_transcript(segs)
             if settings.classify_segments:
                 chunks = classify_chunks(chunks, work_dir / "labels.json")
+            if settings.visual_pipeline:
+                try:  # optional: without it the lecture is still searchable by its transcript
+                    from app.ingestion import visual
+
+                    chunks, layout, quality = visual.run(lecture.source_url, work_dir, chunks)
+                    _set(session, lecture, layout_type=layout, visual_quality_score=quality)
+                except Exception:
+                    log.warning("Visual pipeline failed for lecture %s; indexing the transcript only",
+                                lecture_id, exc_info=True)
             n = store.index_lecture(lecture, chunks)
             if n == 0:
                 raise RuntimeError("No speech found in this video")

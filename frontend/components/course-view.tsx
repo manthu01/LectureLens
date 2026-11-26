@@ -34,6 +34,14 @@ const LABEL_STYLE: Record<Exclude<Segment["label"], "teaching">, string> = {
   exam_hint: "bg-amber-500/20 text-amber-700 dark:text-amber-400",
 };
 
+const LAYOUT_NAME: Record<string, string> = {
+  screen_only: "screen",
+  facecam_screen: "screen + cam",
+  facecam_only: "talking head",
+  board_close: "board",
+  board_far: "board (far)",
+};
+
 const isBusy =(l: Lecture) => l.status !== "indexed" && l.status !== "failed";
 
 export default function CourseView() {
@@ -156,6 +164,11 @@ export default function CourseView() {
                   <span className="mt-0.5 flex gap-2 text-xs">
                     <span className={STATUS_STYLE[l.status]}>{l.status}</span>
                     {l.duration_sec > 0 && <span className="text-muted">{fmtTime(l.duration_sec)}</span>}
+                    {l.layout_type && LAYOUT_NAME[l.layout_type] && (
+                      <span className="text-muted" title="Layout detected from the video">
+                        {LAYOUT_NAME[l.layout_type]}
+                      </span>
+                    )}
                   </span>
                 </button>
               </li>
@@ -261,7 +274,9 @@ export default function CourseView() {
                 {isBusy(lecture) && (
                   <p className="p-2 text-muted">Transcript appears when processing finishes ({lecture.status}).</p>
                 )}
-                {shownSegments.map((s) => {
+                {shownSegments.map((s, i) => {
+                  // Show what was on screen where it changes, not under every segment.
+                  const screen = s.visual_text && s.visual_text !== shownSegments[i - 1]?.visual_text ? s.visual_text : "";
                   const active = current!.start >= Math.floor(s.start_sec) && current!.start < s.end_sec;
                   return (
                     <button
@@ -282,6 +297,11 @@ export default function CourseView() {
                         )}
                         {s.topic && <span className="mr-2 font-medium">{s.topic}:</span>}
                         {s.text}
+                        {screen && (
+                          <span className="mt-1 block whitespace-pre-line border-l-2 border-line pl-2 text-xs text-muted">
+                            <span className="font-medium">On screen:</span> {screen}
+                          </span>
+                        )}
                       </span>
                     </button>
                   );

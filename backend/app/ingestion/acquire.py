@@ -36,6 +36,34 @@ def list_playlist(url: str, limit: int | None = None) -> list[dict]:
     ]
 
 
+def download_video(source: str, out_dir: Path) -> Path:
+    """Video-only stream (720p or less, H.264 so PyAV can decode it) for the visual pipeline.
+    A local file is used in place; a URL is downloaded once to out_dir/video.mp4."""
+    local = Path(source)
+    if local.is_file():
+        return local
+    existing = [p for p in out_dir.glob("video.*") if p.suffix not in (".part", ".ytdl")]
+    if existing:
+        return existing[0]
+
+    import yt_dlp
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    opts = {
+        "format": "bestvideo[height<=720][vcodec^=avc1]/bestvideo[height<=720]/best[height<=720]",
+        "outtmpl": str(out_dir / "video.%(ext)s"),
+        "noplaylist": True,
+        "quiet": True,
+        "no_warnings": True,
+        "js_runtimes": _JS_RUNTIMES,
+    }
+    if settings.ytdlp_cookies_from_browser:
+        opts["cookiesfrombrowser"] = (settings.ytdlp_cookies_from_browser,)
+    with yt_dlp.YoutubeDL(opts) as ydl:
+        info = ydl.extract_info(source, download=True)
+        return Path(ydl.prepare_filename(info))
+
+
 def download_audio(source: str, out_dir: Path) -> dict:
     """Resolve a lecture source to an audio file.
 

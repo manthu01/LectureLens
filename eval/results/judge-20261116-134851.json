@@ -10,20 +10,20 @@
     "unanswerable_refused_by_gate": 9,
     "unanswerable_refused_by_llm": 2,
     "unanswerable_answered": [],
-    "n_judged": 52,
+    "n_judged": 53,
     "n_to_judge": 55,
-    "n_claims": 114,
-    "claim_support": 0.9912280701754386,
-    "citation_support": 0.9824561403508771,
-    "fully_faithful_answers": 0.9807692307692307,
+    "n_claims": 116,
+    "claim_support": 0.9913793103448276,
+    "citation_support": 0.9827586206896551,
+    "fully_faithful_answers": 0.9811320754716981,
     "unfaithful": [
       "q35"
     ],
     "answers_question": 1.0,
     "matches_reference": {
-      "yes": 0.9807692307692307,
+      "yes": 0.9811320754716981,
       "partly": 0.0,
-      "no": 0.019230769230769232
+      "no": 0.018867924528301886
     },
     "reference_no": [
       "q36"
@@ -4655,7 +4655,32 @@
       "answer": "Out of core learning is a technique used when you have a very big dataset (such as in gigabytes) that cannot be loaded all at once into your memory due to a technical limitation, preventing you from training the dataset on your model using standard batch learning [S2][S3]. Instead, you convert the huge dataset into small datasets and send them to your model to train it incrementally using the online learning concept [S2][S3].",
       "supported": true,
       "refused": false,
-      "refused_by": null
+      "refused_by": null,
+      "judge": {
+        "claims": [
+          {
+            "claim": "Out of core learning is a technique used when a dataset is too big to be loaded into memory all at once due to technical limitations, preventing model training using standard batch learning.",
+            "cited": [
+              "S2",
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          },
+          {
+            "claim": "Out of core learning works by converting a huge dataset into small datasets and feeding them to the model to train it incrementally using online learning principles.",
+            "cited": [
+              "S2",
+              "S3"
+            ],
+            "supported_by_excerpts": true,
+            "supported_by_cited": true
+          }
+        ],
+        "answers_question": true,
+        "matches_reference": "yes"
+      },
+      "judge_model": "gemini-3.6-flash"
     },
     {
       "id": "q54",

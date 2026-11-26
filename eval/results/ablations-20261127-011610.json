@@ -1,0 +1,72 @@
+{
+  "visual": [
+    {
+      "setup": "transcript only",
+      "chunks": 229,
+      "mean_chunk_sec": 58.9428384279476,
+      "index_sec": 12.481856700003846,
+      "speech_dense": {
+        "recall@1": 0.8727272727272727,
+        "recall@5": 0.9818181818181818,
+        "mrr": 0.9151515151515152,
+        "timestamp_acc": 0.8363636363636363,
+        "query_ms": 10.152000002563
+      },
+      "speech_hybrid": {
+        "recall@1": 0.9454545454545454,
+        "recall@5": 1.0,
+        "mrr": 0.9666666666666667,
+        "timestamp_acc": 0.9090909090909091,
+        "query_ms": 20.092899998417124
+      },
+      "visual_dense": {
+        "recall@1": 0.4,
+        "recall@5": 0.6,
+        "mrr": 0.5,
+        "timestamp_acc": 0.5,
+        "query_ms": 9.701449998829048
+      },
+      "visual_hybrid": {
+        "recall@1": 0.4,
+        "recall@5": 0.7,
+        "mrr": 0.4916666666666666,
+        "timestamp_acc": 0.3,
+        "query_ms": 17.93080000061309
+      }
+    },
+    {
+      "setup": "transcript + on-screen text (app)",
+      "chunks": 229,
+      "mean_chunk_sec": 58.9428384279476,
+      "index_sec": 23.52244239999709,
+      "speech_dense": {
+        "recall@1": 0.8909090909090909,
+        "recall@5": 0.9818181818181818,
+        "mrr": 0.9272727272727272,
+        "timestamp_acc": 0.8363636363636363,
+        "query_ms": 14.921399997547269
+      },
+      "speech_hybrid": {
+        "recall@1": 0.9454545454545454,
+        "recall@5": 1.0,
+        "mrr": 0.9727272727272728,
+        "timestamp_acc": 0.9090909090909091,
+        "query_ms": 27.627000003121793
+      },
+      "visual_dense": {
+        "recall@1": 0.6,
+        "recall@5": 0.9,
+        "mrr": 0.725,
+        "timestamp_acc": 0.7,
+        "query_ms": 15.948950000165496
+      },
+      "visual_hybrid": {
+        "recall@1": 0.9,
+        "recall@5": 1.0,
+        "mrr": 0.95,
+        "timestamp_acc": 0.8,
+        "query_ms": 31.638400003430434
+      }
+    }
+  ]
+}

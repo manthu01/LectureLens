@@ -39,7 +39,8 @@ def retrieve(
     hits = store.search(course_id, question, k, mode, include_off_topic)
     if not rerank or not hits:
         return hits
-    logits = _reranker(settings.reranker_model).rerank(question, [h["text"] for h in hits])
+    docs = [h["text"] + (f" On screen: {h['visual_text']}" if h.get("visual_text") else "") for h in hits]
+    logits = _reranker(settings.reranker_model).rerank(question, docs)
     for h, logit in zip(hits, logits):
         h["rerank_score"] = 1 / (1 + math.exp(-logit))
     return hits

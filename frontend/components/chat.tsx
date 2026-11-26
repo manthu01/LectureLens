@@ -18,7 +18,9 @@ function Chip({ c, onSeek }: { c: Citation; onSeek: (c: Citation) => void }) {
   return (
     <button
       onClick={() => onSeek(c)}
-      title={c.lecture_title}
+      title={c.on_screen ? `${c.lecture_title}
+
+On screen: ${c.on_screen}` : c.lecture_title}
       className="mx-0.5 inline-flex items-center rounded bg-accent-soft px-1.5 py-0.5 align-baseline font-mono text-xs text-accent hover:underline"
     >
       L{c.lecture_number} · {fmtTime(c.start_sec)}

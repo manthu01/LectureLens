@@ -9,6 +9,8 @@ Each line of the questions file is JSON:
 `lecture` is the lecture number shown in the UI. Questions with "type": "unanswerable" have no
 gold span; they are left out of retrieval metrics and used to report the best rerank score (refusal
 confidence) for tuning RERANK_THRESHOLD. Reranking only adds scores; it does not reorder hits.
+Questions with "type": "visual" are answered by what is on the slide/screen/board, not by the speech;
+they get their own table, so the main table stays comparable with runs from before they existed.
 
 A retrieved segment is a hit when it is from the gold lecture and overlaps the gold time range.
 """
@@ -111,20 +113,32 @@ def main() -> None:
 
     lines = Path(args.questions).read_text(encoding="utf-8").splitlines()
     questions = [json.loads(l) for l in lines if l.strip() and not l.lstrip().startswith("//")]
+    visual = [q for q in questions if q.get("type") == "visual"]
+    questions = [q for q in questions if q.get("type") != "visual"]
     results = [evaluate(args.api, args.course, questions, cfg) for cfg in CONFIGS]
+    visual_results = [evaluate(args.api, args.course, visual, cfg) for cfg in CONFIGS[:4]] if visual else []
 
     cols = ["recall@1", f"recall@{K}", "mrr", "timestamp_acc"]
-    table = [
-        f"| Config | {' | '.join(cols)} | median ms |",
-        f"|---|{'---|' * (len(cols) + 1)}",
-        *(
-            f"| {r['config']} | {' | '.join(f'{r[c]:.2f}' for c in cols)} | {r['latency_ms_median']:.0f} |"
-            for r in results
-        ),
-    ]
+
+    def md_table(rows: list[dict]) -> list[str]:
+        return [
+            f"| Config | {' | '.join(cols)} | median ms |",
+            f"|---|{'---|' * (len(cols) + 1)}",
+            *(
+                f"| {r['config']} | {' | '.join(f'{r[c]:.2f}' for c in cols)} | {r['latency_ms_median']:.0f} |"
+                for r in rows
+            ),
+        ]
+
+    table = md_table(results)
+    if visual_results:
+        table += ["", f"Visual-only questions ({len(visual)}):", ""] + md_table(visual_results)
     n_un = sum(q.get("type") == "unanswerable" for q in questions)
-    print(f"{results[0]['n']} answerable questions, {n_un} unanswerable\n")
+    print(f"{results[0]['n']} answerable questions, {n_un} unanswerable, {len(visual)} visual-only\n")
     print("\n".join(table))
+    for r in visual_results:
+        if r["misses"]:
+            print(f"\nvisual, {r['config']}: no hit in top {K} for {', '.join(r['misses'])}")
     for r in results:
         if r["misses"]:
             print(f"\n{r['config']}: no hit in top {K} for {', '.join(r['misses'])}")
@@ -136,7 +150,8 @@ def main() -> None:
     out_dir = here / "results"
     out_dir.mkdir(exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    (out_dir / f"{stamp}.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    saved = {"transcript": results, "visual": visual_results} if visual_results else results
+    (out_dir / f"{stamp}.json").write_text(json.dumps(saved, indent=2), encoding="utf-8")
     (out_dir / f"{stamp}.md").write_text("\n".join(table) + "\n", encoding="utf-8")
     print(f"\nSaved to {out_dir / stamp}.json and .md")
 

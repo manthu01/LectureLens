@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     # Max LLM-backed requests (ask, quiz) per client IP per minute. 0 = unlimited.
     rate_limit_per_min: int = 0
     classify_segments: bool = True  # label segments teaching/off_topic/admin/exam_hint at ingest
+    # Read the slides/screen/board from the video at ingest (downloads the video, one vision call
+    # per few key frames) and attach the text to the transcript segments shown alongside it.
+    visual_pipeline: bool = True
+    vision_model: str = ""  # empty = LLM_MODEL
 
     @property
     def data_path(self) -> Path:

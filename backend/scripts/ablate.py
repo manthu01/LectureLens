@@ -14,6 +14,9 @@ Ablations (one factor at a time; everything else stays at the app's settings):
   embedding   dense model, with the app's chunking and cached classifier labels.
   classifier  the cached segment labels used for nothing, for the off-topic filter only, for the
               topic prefix only, or for both (the app).
+  visual      on-screen text from the visual pipeline (scripts/add_visual.py) attached to the
+              segments, or not. Scored separately on the transcript questions and on the
+              visual-only questions (type "visual": the answer is on the screen, not in the speech).
   whisper     transcripts from other Whisper sizes (make them with scripts/transcribe_variant.py),
               classifier off. The gold time ranges come from the audio, so they hold for any transcript.
 
@@ -40,7 +43,9 @@ from fastembed import TextEmbedding  # noqa: E402
 from qdrant_client import QdrantClient  # noqa: E402
 
 from app.config import settings  # noqa: E402
+from app.ingestion import visual  # noqa: E402
 from app.ingestion.chunk import chunk_transcript  # noqa: E402
+from app.ingestion.visual.align import attach  # noqa: E402
 from app.retrieval import store  # noqa: E402
 
 K = 5
@@ -94,12 +99,14 @@ def load_lectures(course: int, transcript: str = "transcript.json") -> list[dict
                 "meta": SimpleNamespace(id=id_, course_id=course, number=number, title=title, video_id=video_id),
                 "segs": json.loads((d / transcript).read_text(encoding="utf-8")),
                 "labels": json.loads(labels_path.read_text(encoding="utf-8")) if labels_path.exists() else None,
+                "reads": visual.cached_reads(d),
             }
         )
     return out
 
 
-def build(lectures: list[dict], model: str, chunking: dict, use_filter: bool, use_topic: bool) -> dict:
+def build(lectures: list[dict], model: str, chunking: dict, use_filter: bool, use_topic: bool,
+          use_visual: bool = False) -> dict:
     """Index everything into a fresh in-memory collection; returns chunk stats and build time."""
     client = QdrantClient(":memory:")
     store._client = lambda: client  # the app's store functions now read and write this index
@@ -120,6 +127,10 @@ def build(lectures: list[dict], model: str, chunking: dict, use_filter: bool, us
                 }
                 for c, lab in zip(chunks, labels)
             ]
+        if use_visual:
+            if lec["reads"] is None:
+                raise RuntimeError(f"no frame reads for lecture {lec['meta'].number}; run scripts/add_visual.py")
+            chunks = attach(chunks, lec["reads"])
         durations += [c["end_sec"] - c["start_sec"] for c in chunks]
         store.index_lecture(lec["meta"], chunks)
     return {
@@ -176,12 +187,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--course", type=int, default=1)
     ap.add_argument("--questions", default=str(ROOT / "eval" / "questions.jsonl"))
-    ap.add_argument("--only", choices=["chunking", "embedding", "classifier", "whisper"])
+    ap.add_argument("--only", choices=["chunking", "embedding", "classifier", "visual", "whisper"])
     args = ap.parse_args()
 
     lines = Path(args.questions).read_text(encoding="utf-8").splitlines()
     qs = [json.loads(l) for l in lines if l.strip() and not l.lstrip().startswith("//")]
-    answerable = [q for q in qs if q.get("type") != "unanswerable"]
+    visual_qs = [q for q in qs if q.get("type") == "visual"]
+    answerable = [q for q in qs if q.get("type") not in ("unanswerable", "visual")]
     lectures = load_lectures(args.course)
     app_chunking = CHUNKINGS["60 s (app)"]
     results, md = {}, [f"# Retrieval ablations ({len(answerable)} answerable questions, {len(lectures)} lectures)", ""]
@@ -218,6 +230,24 @@ def main() -> None:
         results["classifier"] = rows
         md += ["## Segment classifier (60 s chunks, bge-small)", "", "Hybrid:", ""] + table(rows, "hybrid", [])
         md += ["", "Dense only:", ""] + table(rows, "dense", []) + [""]
+
+    if args.only in (None, "visual") and visual_qs:
+        print("On-screen text:")
+        rows = []
+        for name, on in (("transcript only", False), ("transcript + on-screen text (app)", True)):
+            stats = build(lectures, settings.embedding_model, app_chunking, True, True, use_visual=on)
+            row = {"setup": name, **stats}
+            for label, subset in (("speech", answerable), ("visual", visual_qs)):
+                for mode in ("dense", "hybrid"):
+                    row[f"{label}_{mode}"] = score(args.course, subset, mode)
+            print(f"  {name}: speech R@1 {row['speech_hybrid']['recall@1']:.2f}, "
+                  f"visual R@1 {row['visual_hybrid']['recall@1']:.2f}", flush=True)
+            rows.append(row)
+        results["visual"] = rows
+        md += ["## On-screen text (60 s chunks, bge-small, classifier on)", "",
+               f"Visual-only questions ({len(visual_qs)}), hybrid:", ""] + table(rows, "visual_hybrid", [])
+        md += ["", f"Transcript questions ({len(answerable)}), hybrid:", ""] + table(rows, "speech_hybrid", [])
+        md += ["", "Visual-only questions, dense only:", ""] + table(rows, "visual_dense", []) + [""]
 
     if args.only in (None, "whisper"):
         print("Whisper:")
