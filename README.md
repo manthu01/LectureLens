@@ -181,16 +181,16 @@ Caveats: 57 of the 66 questions were written from the transcripts and checked by
 backend/.venv/Scripts/python backend/scripts/eval_slides.py --lecture <id>
 ```
 
-Tested on MIT OpenCourseWare 6.0001 (Fall 2016) Lecture 1, a 43-minute lecture with its 35-slide PDF (indexed locally as a second course; CC BY-NC-SA). Gold labels come from the video: each key frame's text is matched to the slide that contains most of its words, and a segment's gold slide is the one on screen longest during it (35 of 45 segments have one; the rest show the instructor's Python shell or nothing readable).
+Tested on MIT OpenCourseWare 6.0001 (Fall 2016), indexed locally as a second course (CC BY-NC-SA): Lecture 1 (43 min, 35 slides) was used to choose the method, and Lecture 2 (44 min, 24 slides) was held out and run once afterwards. Gold labels come from the video: each key frame's text is matched to the slide that contains most of its words, and a segment's gold slide is the one on screen longest during it (segments that show the instructor's Python shell or nothing readable have none). A spot check of 8 random gold frames from Lecture 2 found all 8 matched to the right slide.
 
-| Alignment | Exact slide | Within 1 slide |
-|---|---|---|
-| Embeddings only, transcript | 0.43 | 0.71 |
-| Embeddings + TF-IDF, best slide per segment, transcript | 0.49 | 0.77 |
-| Embeddings + TF-IDF, forward path, transcript (app, no screen reading) | 0.49 | 0.77 |
-| **Embeddings + TF-IDF, forward path, transcript + on-screen text (app)** | **0.74** | **0.94** |
+| Alignment | L1 exact | L1 within 1 | **L2 exact (held out)** | **L2 within 1** |
+|---|---|---|---|---|
+| Embeddings only, forward path, transcript | 0.43 | 0.71 | 0.71 | 0.87 |
+| Embeddings + TF-IDF, best slide per segment, transcript | 0.49 | 0.77 | 0.58 | 0.79 |
+| Embeddings + TF-IDF, forward path, transcript (app, no screen reading) | 0.49 | 0.77 | 0.63 | 0.87 |
+| **Embeddings + TF-IDF, forward path, transcript + on-screen text (app)** | **0.74** | **0.94** | **0.82** | **0.97** |
 
-Slides are terse keyword lists, so word overlap (TF-IDF) adds to embeddings. Reading the screen helps most, but the gold labels come from the same frame reads, so that row is optimistic. This lecture was also used to choose the method, and a 60-second segment often spans two slides, which caps "exact". A held-out lecture is still to run. Results: `eval/results/slides-gold-lecture11.json`.
+With screen reading, about 4 in 5 segments land on the exact slide and nearly all within one slide, on the held-out lecture too. That row is optimistic, though, because the gold labels come from the same frame reads. From the transcript alone it is weaker. Adding TF-IDF helped on Lecture 1 but not on Lecture 2 (0.63 vs 0.71 for embeddings alone), so that choice is not settled by two lectures. The forward path helped on Lecture 2 (0.63 vs 0.58 exact) and made no difference on Lecture 1. A 60-second segment often spans two slides, which caps "exact". Results: `eval/results/slides-gold-lecture11.json`, `slides-gold-lecture12.json`.
 
 ### Ablations
 

@@ -1,0 +1,1001 @@
+{
+ "frames": [
+  {
+   "file": "00005.jpg",
+   "start_sec": 0.0,
+   "end_sec": 5.005,
+   "slide": 24,
+   "text": "6.0001, Fall 2016\nIntroduction to Computer Science and Programming in Python\nAna Bell\nLecture 2: Branching and Iteration"
+  },
+  {
+   "file": "00028.jpg",
+   "start_sec": 5.005,
+   "end_sec": 28.661966666666668,
+   "slide": null,
+   "text": "Some content in this video is not covered under our Creative Commons license.\nSee the closing credits for more information."
+  },
+  {
+   "file": "00046.jpg",
+   "start_sec": 28.661966666666668,
+   "end_sec": 46.813433333333336,
+   "slide": 1,
+   "text": "BRANCHING, ITERATION\n(download slides and .py files to follow along!)\n6.0001 LECTURE 2"
+  },
+  {
+   "file": "00057.jpg",
+   "start_sec": 46.813433333333336,
+   "end_sec": 57.8578,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00092.jpg",
+   "start_sec": 57.8578,
+   "end_sec": 92.8928,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00102.jpg",
+   "start_sec": 92.8928,
+   "end_sec": 102.9028,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00132.jpg",
+   "start_sec": 102.9028,
+   "end_sec": 132.39893333333333,
+   "slide": 4,
+   "text": "STRINGS\n- letters, special characters, spaces, digits\n- enclose in quotation marks or single quotes\n  hi = \"hello there\"\n- concatenate strings\n  name = \"ana\"\n  greet = hi + name\n  greeting = hi + \" \" "
+  },
+  {
+   "file": "00165.jpg",
+   "start_sec": 132.39893333333333,
+   "end_sec": 165.49866666666668,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00191.jpg",
+   "start_sec": 165.49866666666668,
+   "end_sec": 191.75823333333332,
+   "slide": 4,
+   "text": "STRINGS\n- letters, special characters, spaces, digits\n- enclose in quotation marks or single quotes\n  hi = \"hello there\"\n- concatenate strings\n  name = \"ana\"\n  greet = hi + name\n  greeting = hi + \" \" "
+  },
+  {
+   "file": "00241.jpg",
+   "start_sec": 191.75823333333332,
+   "end_sec": 241.77486666666667,
+   "slide": null,
+   "text": "########\n## EXAMPLE: strings\n########\nhi = \"hello there\"\nname = \"ana\"\ngreet = hi + name\nprint(greet)\n#greeting = hi + \" \" + name\n#print(greeting)\n#silly = hi + (\" \" + name)*3\n#print(silly)\n########\n##"
+  },
+  {
+   "file": "00269.jpg",
+   "start_sec": 241.77486666666667,
+   "end_sec": 269.7695,
+   "slide": null,
+   "text": "########\n## EXAMPLE: strings\n########\nhi = \"hello there\"\nname = \"ana\"\ngreet = hi + name\nprint(greet)\ngreeting = hi + \" \" + name\n#print(greeting)\n#silly = hi + (\" \" + name)*3\n#print(silly)\n########\n## "
+  },
+  {
+   "file": "00284.jpg",
+   "start_sec": 269.7695,
+   "end_sec": 284.7845,
+   "slide": null,
+   "text": "########\n## EXAMPLE: strings\n########\nhi = \"hello there\"\nname = \"ana\"\ngreet = hi + name\nprint(greet)\ngreeting = hi + \" \" + name\nprint(greeting)\n#silly = hi + (\" \" + name)*3\n#print(silly)\n########\n## E"
+  },
+  {
+   "file": "00297.jpg",
+   "start_sec": 284.7845,
+   "end_sec": 297.9309666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00308.jpg",
+   "start_sec": 297.9309666666667,
+   "end_sec": 308.14116666666666,
+   "slide": null,
+   "text": "1 ####################\n2 ## EXAMPLE: strings\n3 ####################\n4 hi = \"hello there\"\n5 name = \"ana\"\n6 greet = hi + name\n7 print(greet)\n8 greeting = hi + \" \" + name\n9 print(greeting)\n10 silly = hi "
+  },
+  {
+   "file": "00316.jpg",
+   "start_sec": 308.14116666666666,
+   "end_sec": 316.78313333333335,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00335.jpg",
+   "start_sec": 316.78313333333335,
+   "end_sec": 335.0347,
+   "slide": null,
+   "text": "1 ####################\n2 ## EXAMPLE: strings\n3 ####################\n4 hi = \"hello there\"\n5 name = \"ana\"\n6 greet = hi + name\n7 print(greet)\n8 greeting = hi + \" \" + name\n9 print(greeting)\n10 silly = hi "
+  },
+  {
+   "file": "00361.jpg",
+   "start_sec": 335.0347,
+   "end_sec": 361.19416666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00371.jpg",
+   "start_sec": 361.19416666666666,
+   "end_sec": 371.20416666666665,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00399.jpg",
+   "start_sec": 371.20416666666665,
+   "end_sec": 399.43236666666667,
+   "slide": 5,
+   "text": "INPUT/OUTPUT: print\n- used to output stuff to console\n- keyword is print\nx = 1\nprint(x)\nx_str = str(x)\nprint(\"my fav num is\", x, \".\", \"x =\", x)\nprint(\"my fav num is \" + x_str + \". \" + \"x = \" + x_str)"
+  },
+  {
+   "file": "00430.jpg",
+   "start_sec": 399.43236666666667,
+   "end_sec": 430.7303,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00450.jpg",
+   "start_sec": 430.7303,
+   "end_sec": 450.38326666666666,
+   "slide": 5,
+   "text": "INPUT/OUTPUT: print\n- used to output stuff to console\n- keyword is print\nx = 1\nprint(x)\nx_str = str(x)\nprint(\"my fav num is\", x, \".\", \"x =\", x)\nprint(\"my fav num is \" + x_str + \". \" + \"x = \" + x_str)"
+  },
+  {
+   "file": "00520.jpg",
+   "start_sec": 450.38326666666666,
+   "end_sec": 520.7202,
+   "slide": null,
+   "text": "3 ##################\n4 #hi = \"hello there\"\n5 #name = \"ana\"\n6 #greet = hi + name\n7 #print(greet)\n8 #greeting = hi + \" \" + name\n9 #print(greeting)\n10 #silly = hi + (\" \" + name)*3\n11 #print(silly)\n12 \n13"
+  },
+  {
+   "file": "00530.jpg",
+   "start_sec": 520.7202,
+   "end_sec": 530.7302,
+   "slide": null,
+   "text": "3 ##################\n4 #hi = \"hello there\"\n5 #name = \"ana\"\n6 #greet = hi + name\n7 #print(greet)\n8 #greeting = hi + \" \" + name\n9 #print(greeting)\n10 #silly = hi + (\" \" + name)*3\n11 #print(silly)\n12 \n13"
+  },
+  {
+   "file": "00555.jpg",
+   "start_sec": 530.7302,
+   "end_sec": 555.7552,
+   "slide": null,
+   "text": "3 ##################\n4 #hi = \"hello there\"\n5 #name = \"ana\"\n6 #greet = hi + name\n7 #print(greet)\n8 #greeting = hi + \" \" + name\n9 #print(greeting)\n10 #silly = hi + (\" \" + name)*3\n11 #print(silly)\n12 \n13"
+  },
+  {
+   "file": "00581.jpg",
+   "start_sec": 555.7552,
+   "end_sec": 581.9814,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00602.jpg",
+   "start_sec": 581.9814,
+   "end_sec": 602.1348666666667,
+   "slide": 6,
+   "text": "INPUT/OUTPUT: input (\"\")\n- prints whatever is in the quotes\n- user types in something and hits enter\n- binds that value to a variable\ntext = input(\"Type anything... \")\nprint(5*text)\n- input gives you "
+  },
+  {
+   "file": "00690.jpg",
+   "start_sec": 602.1348666666667,
+   "end_sec": 690.8902,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00707.jpg",
+   "start_sec": 690.8902,
+   "end_sec": 707.3399666666667,
+   "slide": 6,
+   "text": "INPUT/OUTPUT: input(\"\")\n- prints whatever is in the quotes\n- user types in something and hits enter\n- binds that value to a variable\n  text = input(\"Type anything... \")\n  print(5*text)\n  [handwritten:"
+  },
+  {
+   "file": "00742.jpg",
+   "start_sec": 707.3399666666667,
+   "end_sec": 742.5084333333333,
+   "slide": null,
+   "text": "17 #print(x)\n18 #x_str = str(x)\n19 #print(\"my fav number is\", x, \".\", \"x=\", x)\n20 #print(\"my fav number is\", x_str + \".\" + \"x=\" + x_str)\n21 #print(\"my fav number is\" + x_str + \".\" + \"x=\" + x_str)\n22 \n"
+  },
+  {
+   "file": "00782.jpg",
+   "start_sec": 742.5084333333333,
+   "end_sec": 782.5484333333334,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00819.jpg",
+   "start_sec": 782.5484333333334,
+   "end_sec": 819.3518666666666,
+   "slide": 7,
+   "text": "COMPARISON OPERATORS ON int, float, string\n- i and j are variable names\n- comparisons below evaluate to a Boolean\ni > j\ni >= j\ni < j\ni <= j\ni == j -> equality test, True if i is the same as j\ni != j -"
+  },
+  {
+   "file": "00858.jpg",
+   "start_sec": 819.3518666666666,
+   "end_sec": 858.6578,
+   "slide": null,
+   "text": "17 #print(x)\n18 #x_str = str(x)\n19 #print(\"my fav number is\", x, \".\", \"x=\", x)\n20 #print(\"my fav number is\", x_str + \".\" + \"x=\" + x_str)\n21 #print(\"my fav number is\" + x_str + \".\" + \"x=\" + x_str)\n22\n2"
+  },
+  {
+   "file": "00866.jpg",
+   "start_sec": 858.6578,
+   "end_sec": 866.866,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "00888.jpg",
+   "start_sec": 866.866,
+   "end_sec": 888.5543333333334,
+   "slide": 7,
+   "text": "COMPARISON OPERATORS ON int, float, string\n- i and j are variable names\n- comparisons below evaluate to a Boolean\ni > j\ni >= j\ni < j\ni <= j\ni == j -> equality test, True if i is the same as j\ni != j -"
+  },
+  {
+   "file": "00947.jpg",
+   "start_sec": 888.5543333333334,
+   "end_sec": 947.8802666666667,
+   "slide": 8,
+   "text": "LOGIC OPERATORS ON bools\n- a and b are variable names (with Boolean values)\nnot a -> True if a is False, False if a is True\na and b -> True if both are True\na or b -> True if either or both are True\n["
+  },
+  {
+   "file": "01030.jpg",
+   "start_sec": 947.8802666666667,
+   "end_sec": 1030.5295,
+   "slide": null,
+   "text": "[map of a city with highlighted buildings in orange, blue, yellow, and purple]"
+  },
+  {
+   "file": "01134.jpg",
+   "start_sec": 1030.5295,
+   "end_sec": 1134.7002333333332,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01159.jpg",
+   "start_sec": 1134.7002333333332,
+   "end_sec": 1159.7252333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01169.jpg",
+   "start_sec": 1159.7252333333333,
+   "end_sec": 1169.7352333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01184.jpg",
+   "start_sec": 1169.7352333333333,
+   "end_sec": 1184.7502333333334,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01203.jpg",
+   "start_sec": 1184.7502333333334,
+   "end_sec": 1203.6024,
+   "slide": 11,
+   "text": "CONTROL FLOW - BRANCHING\nif <condition>:\n    <expression>\n    <expression>\n    ...\nif <condition>:\n    <expression>\n    <expression>\n    ...\nelse:\n    <expression>\n    <expression>\n    ...\nif <conditi"
+  },
+  {
+   "file": "01258.jpg",
+   "start_sec": 1203.6024,
+   "end_sec": 1258.8909666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01268.jpg",
+   "start_sec": 1258.8909666666666,
+   "end_sec": 1268.9009666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01278.jpg",
+   "start_sec": 1268.9009666666666,
+   "end_sec": 1278.9109666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01288.jpg",
+   "start_sec": 1278.9109666666666,
+   "end_sec": 1288.2202666666667,
+   "slide": 11,
+   "text": "CONTROL FLOW - BRANCHING\nif <condition>:\n    <expression>\n    <expression>\n    ...\nif <condition>:\n    <expression>\n    <expression>\n    ...\nels:\n    <expression>\n    <expression>\n    ...\nif <conditio"
+  },
+  {
+   "file": "01349.jpg",
+   "start_sec": 1288.2202666666667,
+   "end_sec": 1349.7817666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01421.jpg",
+   "start_sec": 1349.7817666666667,
+   "end_sec": 1421.4867333333334,
+   "slide": 11,
+   "text": "CONTROL FLOW - BRANCHING\nif <condition>:\n    <expression>\n    <expression>\n    ...\nif <condition>:\n    <expression>\n    <expression>\n    ...\nels:\n    <expression>\n    <expression>\n    ...\nif <conditio"
+  },
+  {
+   "file": "01456.jpg",
+   "start_sec": 1421.4867333333334,
+   "end_sec": 1456.5217333333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01476.jpg",
+   "start_sec": 1456.5217333333333,
+   "end_sec": 1476.5417333333332,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01486.jpg",
+   "start_sec": 1476.5417333333332,
+   "end_sec": 1486.5517333333332,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01526.jpg",
+   "start_sec": 1486.5517333333332,
+   "end_sec": 1526.5917333333334,
+   "slide": 12,
+   "text": "INDENTATION matters in Python how you denote blocks of code x = float(input(\"Enter a number for x: \")) y = float(input(\"Enter a number for y: \")) if x == y: print(\"x and y are equal\") if y != 0: print"
+  },
+  {
+   "file": "01553.jpg",
+   "start_sec": 1526.5917333333334,
+   "end_sec": 1553.3518,
+   "slide": 13,
+   "text": "= VS == x = float(input(\"Enter a number for x: \")) y = float(input(\"Enter a number for y: \")) if x == y: print(\"x and y are equal\") if y != 0: print(\"therefore, x / y is\", x/y) elif x < y: print(\"x is"
+  },
+  {
+   "file": "01593.jpg",
+   "start_sec": 1553.3518,
+   "end_sec": 1593.3918,
+   "slide": 14,
+   "text": "[diagram: pixelated video game screen showing a character in a maze of bushes] Legend of Zelda - Lost Woods keep going right, takes you back to this same screen, stuck in a loop if <exit right>: <set "
+  },
+  {
+   "file": "01628.jpg",
+   "start_sec": 1593.3918,
+   "end_sec": 1628.4268,
+   "slide": 14,
+   "text": "[diagram: pixelated video game screen showing a character in a maze of bushes] Legend of Zelda - Lost Woods keep going right, takes you back to this same screen, stuck in a loop if <exit right>: <set "
+  },
+  {
+   "file": "01648.jpg",
+   "start_sec": 1628.4268,
+   "end_sec": 1648.4468,
+   "slide": 14,
+   "text": "Legend of Zelda - Lost Woods\nkeep going right, takes you back to this same screen, stuck in a loop\n[diagram: grid of trees with Link character at top center]\nif <exit right>:\n    <set background to wo"
+  },
+  {
+   "file": "01704.jpg",
+   "start_sec": 1648.4468,
+   "end_sec": 1704.8031,
+   "slide": 15,
+   "text": "Legend of Zelda - Lost Woods\nkeep going right, takes you back to this same screen, stuck in a loop\n[diagram: grid of trees with Link character at top center]\nwhile <exit right>:\n    <set background to"
+  },
+  {
+   "file": "01742.jpg",
+   "start_sec": 1704.8031,
+   "end_sec": 1742.6075333333333,
+   "slide": 16,
+   "text": "CONTROL FLOW: while LOOPS\nwhile <condition>:\n    <expression>\n    <expression>\n...\n<condition> evaluates to a Boolean\nif <condition> is True, do all the steps inside the while code block\ncheck <condit"
+  },
+  {
+   "file": "01793.jpg",
+   "start_sec": 1742.6075333333333,
+   "end_sec": 1793.6919,
+   "slide": 17,
+   "text": "while LOOP EXAMPLE\nYou are in the Lost Forest.\n*************\n*************\n    (:)\n*************\n*************\nGo left or right?\nPROGRAM:\nn = input(\"You're in the Lost Forest. Go left or right? \")\nwhi"
+  },
+  {
+   "file": "01819.jpg",
+   "start_sec": 1793.6919,
+   "end_sec": 1819.3508666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01847.jpg",
+   "start_sec": 1819.3508666666667,
+   "end_sec": 1847.8793666666666,
+   "slide": null,
+   "text": "## EXAMPLE: while Loops\n## Try expanding this code to show a sad face if you stay in the loop\n## twice and flip the table any more times than that?\n## Hint: use a counter\nn = input(\"You are in the Los"
+  },
+  {
+   "file": "01862.jpg",
+   "start_sec": 1847.8793666666666,
+   "end_sec": 1862.8943666666667,
+   "slide": null,
+   "text": "#num = int(input(\"Enter a number: \"))\n#if num % 2 == 0:\n#    print(\"number is even\")\n#else:\n#    print(\"number is odd\")\n\n#####################\n## EXAMPLE: while loops\n## Try expanding this code to sho"
+  },
+  {
+   "file": "01922.jpg",
+   "start_sec": 1862.8943666666667,
+   "end_sec": 1922.1202,
+   "slide": 18,
+   "text": "CONTROL FLOW:\nwhile and for LOOPS\n- iterate through numbers in a sequence\n\n# more complicated with while loop\nn = 0\nwhile n < 5:\n    print(n)\n    n = n + 1"
+  },
+  {
+   "file": "01958.jpg",
+   "start_sec": 1922.1202,
+   "end_sec": 1958.0894666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "01974.jpg",
+   "start_sec": 1958.0894666666666,
+   "end_sec": 1974.6393333333333,
+   "slide": null,
+   "text": "#num = int(input(\"Enter a number: \"))\n#if num % 2 == 0:\n#    print(\"number is even\")\n#else:\n#    print(\"number is odd\")\n\n#####################\n## EXAMPLE: while loops\n## Try expanding this code to sho"
+  },
+  {
+   "file": "01994.jpg",
+   "start_sec": 1974.6393333333333,
+   "end_sec": 1994.6593333333333,
+   "slide": null,
+   "text": "#num = int(input(\"Enter a number: \"))\n#if num % 2 == 0:\n#    print(\"number is even\")\n#else:\n#    print(\"number is odd\")\n\n#####################\n## EXAMPLE: while loops\n## Try expanding this code to sho"
+  },
+  {
+   "file": "02009.jpg",
+   "start_sec": 1994.6593333333333,
+   "end_sec": 2009.6743333333334,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02023.jpg",
+   "start_sec": 2009.6743333333334,
+   "end_sec": 2023.4881333333333,
+   "slide": 18,
+   "text": "CONTROL FLOW: while and for LOOPS - iterate through numbers in a sequence # more complicated with while loop n = 0 while n < 5: print(n) n = n+1"
+  },
+  {
+   "file": "02055.jpg",
+   "start_sec": 2023.4881333333333,
+   "end_sec": 2055.3866666666668,
+   "slide": 18,
+   "text": "CONTROL FLOW: while and for LOOPS - iterate through numbers in a sequence # more complicated with while loop n = 0 while n < 5: print(n) n = n+1 # shortcut with for loop for n in range(5): print(n)"
+  },
+  {
+   "file": "02069.jpg",
+   "start_sec": 2055.3866666666668,
+   "end_sec": 2069.700966666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02088.jpg",
+   "start_sec": 2069.700966666667,
+   "end_sec": 2088.453033333333,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02098.jpg",
+   "start_sec": 2088.453033333333,
+   "end_sec": 2098.4630333333334,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02113.jpg",
+   "start_sec": 2098.4630333333334,
+   "end_sec": 2113.778333333333,
+   "slide": 19,
+   "text": "CONTROL FLOW: for LOOPS for <variable> in range (<some_num>): <expression> <expression> ... - each time through the loop, <variable> takes a value - first time, <variable> starts at the smallest value"
+  },
+  {
+   "file": "02184.jpg",
+   "start_sec": 2113.778333333333,
+   "end_sec": 2184.2821,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02209.jpg",
+   "start_sec": 2184.2821,
+   "end_sec": 2209.473933333333,
+   "slide": 20,
+   "text": "range(start, stop, step)\n- default values are start = 0 and step = 1 and optional\n- loop until value is stop - 1\nmysum = 0\nfor i in range(7, 10):\n    mysum += i\nprint(mysum)\nmysum = 0\nfor i in range(5"
+  },
+  {
+   "file": "02254.jpg",
+   "start_sec": 2209.473933333333,
+   "end_sec": 2254.185266666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02278.jpg",
+   "start_sec": 2254.185266666667,
+   "end_sec": 2278.8098666666665,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02303.jpg",
+   "start_sec": 2278.8098666666665,
+   "end_sec": 2303.8348666666666,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02313.jpg",
+   "start_sec": 2303.8348666666666,
+   "end_sec": 2313.7781333333332,
+   "slide": 20,
+   "text": "range(start, stop, step)\n- default values are start = 0 and step = 1 and optional\n- loop until value is stop - 1\nmysum = 0\nfor i in range(7, 10):\n    mysum += i\nprint(mysum)\n[handwritten annotations s"
+  },
+  {
+   "file": "02352.jpg",
+   "start_sec": 2313.7781333333332,
+   "end_sec": 2352.1831666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02396.jpg",
+   "start_sec": 2352.1831666666667,
+   "end_sec": 2396.2939,
+   "slide": 20,
+   "text": "mysum = 0\nfor i in range(7.1, 10.3):\n    mysum += i\nprint(mysum)\n\nmysum = 0\nfor i in range(5, 11, 2):\n    mysum += i\n    if mysum == 5:\n        break\n    mysum += 1\nprint(mysum)"
+  },
+  {
+   "file": "02425.jpg",
+   "start_sec": 2396.2939,
+   "end_sec": 2425.7233,
+   "slide": 20,
+   "text": "range(start, stop, step)\n- default values are start = 0 and step = 1 and optional\n- loop until value is stop - 1\n\nmysum = 0\nfor i in range(7, 10):\n    mysum += i\nprint(mysum)\n\nmysum = 0\nfor i in range"
+  },
+  {
+   "file": "02444.jpg",
+   "start_sec": 2425.7233,
+   "end_sec": 2444.775666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02454.jpg",
+   "start_sec": 2444.775666666667,
+   "end_sec": 2454.7856666666667,
+   "slide": null,
+   "text": ""
+  },
+  {
+   "file": "02470.jpg",
+   "start_sec": 2454.7856666666667,
+   "end_sec": 2470.3679,
+   "slide": 21,
+   "text": "break STATEMENT\n- immediately exits whatever loop it is in\n- skips remaining expressions in code block\n- exits only innermost loop!\n\nwhile <condition_1>:\n    while <condition_2>:\n        <expression_a"
+  },
+  {
+   "file": "02525.jpg",
+   "start_sec": 2470.3679,
+   "end_sec": 2525.4229,
+   "slide": 21,
+   "text": "break STATEMENT\nimmediately exits whatever loop it is in\nskips remaining expressions in code block\nexits only innermost loop!\nwhile <condition_1>:\nwhile <condition_2>:\n<expression_a>\nbreak\n<expression"
+  },
+  {
+   "file": "02551.jpg",
+   "start_sec": 2525.4229,
+   "end_sec": 2551.3821666666668,
+   "slide": 23,
+   "text": "for VS while LOOPS\nfor loops\nknow number of iterations\ncan end early via break\nuses a counter\ncan rewrite a for loop using a while loop\nwhile loops\nunbounded number of iterations\ncan end early via bre"
+  },
+  {
+   "file": "02607.jpg",
+   "start_sec": 2551.3821666666668,
+   "end_sec": 2607.3714333333332,
+   "slide": 14,
+   "text": "Sources of content (c) the respective copyright holders, all rights reserved, excluded from our Creative Commons license. For more information, see http://ocw.mit.edu/fairuse\nScreenshots from The Lege"
+  }
+ ],
+ "segments": [
+  {
+   "start_sec": 0.4,
+   "end_sec": 60.6,
+   "gold": 1,
+   "transcript_path": 24,
+   "best_each": 24,
+   "with_visual": 1
+  },
+  {
+   "start_sec": 59.24,
+   "end_sec": 119.36,
+   "gold": 4,
+   "transcript_path": 2,
+   "best_each": 2,
+   "with_visual": 4
+  },
+  {
+   "start_sec": 116.52,
+   "end_sec": 177.04,
+   "gold": 4,
+   "transcript_path": 4,
+   "best_each": 4,
+   "with_visual": 4
+  },
+  {
+   "start_sec": 174.96,
+   "end_sec": 235.01,
+   "gold": 4,
+   "transcript_path": 4,
+   "best_each": 4,
+   "with_visual": 4
+  },
+  {
+   "start_sec": 230.69,
+   "end_sec": 292.82,
+   "gold": null,
+   "transcript_path": 4,
+   "best_each": 4,
+   "with_visual": 4
+  },
+  {
+   "start_sec": 285.41,
+   "end_sec": 348.18,
+   "gold": null,
+   "transcript_path": 4,
+   "best_each": 4,
+   "with_visual": 4
+  },
+  {
+   "start_sec": 343.62,
+   "end_sec": 403.66,
+   "gold": 5,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 5
+  },
+  {
+   "start_sec": 401.1,
+   "end_sec": 464.12,
+   "gold": 5,
+   "transcript_path": 6,
+   "best_each": 5,
+   "with_visual": 5
+  },
+  {
+   "start_sec": 460.0,
+   "end_sec": 522.84,
+   "gold": null,
+   "transcript_path": 4,
+   "best_each": 4,
+   "with_visual": 5
+  },
+  {
+   "start_sec": 519.52,
+   "end_sec": 581.08,
+   "gold": null,
+   "transcript_path": 5,
+   "best_each": 5,
+   "with_visual": 5
+  },
+  {
+   "start_sec": 577.64,
+   "end_sec": 638.44,
+   "gold": 6,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 6
+  },
+  {
+   "start_sec": 636.84,
+   "end_sec": 696.86,
+   "gold": 6,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 6
+  },
+  {
+   "start_sec": 694.7,
+   "end_sec": 761.24,
+   "gold": 6,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 6
+  },
+  {
+   "start_sec": 752.47,
+   "end_sec": 812.78,
+   "gold": 7,
+   "transcript_path": 6,
+   "best_each": 6,
+   "with_visual": 7
+  },
+  {
+   "start_sec": 809.82,
+   "end_sec": 871.81,
+   "gold": 7,
+   "transcript_path": 7,
+   "best_each": 7,
+   "with_visual": 7
+  },
+  {
+   "start_sec": 865.02,
+   "end_sec": 925.61,
+   "gold": 8,
+   "transcript_path": 7,
+   "best_each": 7,
+   "with_visual": 7
+  },
+  {
+   "start_sec": 921.21,
+   "end_sec": 986.39,
+   "gold": 8,
+   "transcript_path": 8,
+   "best_each": 8,
+   "with_visual": 8
+  },
+  {
+   "start_sec": 980.39,
+   "end_sec": 1041.86,
+   "gold": null,
+   "transcript_path": 3,
+   "best_each": 3,
+   "with_visual": 3
+  },
+  {
+   "start_sec": 1040.06,
+   "end_sec": 1102.18,
+   "gold": null,
+   "transcript_path": 10,
+   "best_each": 10,
+   "with_visual": 10
+  },
+  {
+   "start_sec": 1097.82,
+   "end_sec": 1158.78,
+   "gold": null,
+   "transcript_path": 10,
+   "best_each": 10,
+   "with_visual": 10
+  },
+  {
+   "start_sec": 1156.58,
+   "end_sec": 1221.58,
+   "gold": 11,
+   "transcript_path": 11,
+   "best_each": 11,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 1216.3,
+   "end_sec": 1278.47,
+   "gold": null,
+   "transcript_path": 11,
+   "best_each": 16,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 1274.39,
+   "end_sec": 1340.46,
+   "gold": 11,
+   "transcript_path": 11,
+   "best_each": 16,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 1330.66,
+   "end_sec": 1391.2,
+   "gold": 11,
+   "transcript_path": 11,
+   "best_each": 16,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 1384.28,
+   "end_sec": 1444.66,
+   "gold": 11,
+   "transcript_path": 11,
+   "best_each": 11,
+   "with_visual": 11
+  },
+  {
+   "start_sec": 1440.98,
+   "end_sec": 1501.08,
+   "gold": 12,
+   "transcript_path": 12,
+   "best_each": 12,
+   "with_visual": 12
+  },
+  {
+   "start_sec": 1498.72,
+   "end_sec": 1558.82,
+   "gold": 12,
+   "transcript_path": 12,
+   "best_each": 12,
+   "with_visual": 12
+  },
+  {
+   "start_sec": 1558.22,
+   "end_sec": 1618.49,
+   "gold": 14,
+   "transcript_path": 14,
+   "best_each": 14,
+   "with_visual": 14
+  },
+  {
+   "start_sec": 1616.05,
+   "end_sec": 1676.41,
+   "gold": 14,
+   "transcript_path": 14,
+   "best_each": 14,
+   "with_visual": 14
+  },
+  {
+   "start_sec": 1668.61,
+   "end_sec": 1729.66,
+   "gold": 15,
+   "transcript_path": 16,
+   "best_each": 16,
+   "with_visual": 16
+  },
+  {
+   "start_sec": 1727.22,
+   "end_sec": 1788.95,
+   "gold": 17,
+   "transcript_path": 16,
+   "best_each": 16,
+   "with_visual": 16
+  },
+  {
+   "start_sec": 1786.95,
+   "end_sec": 1851.2,
+   "gold": 17,
+   "transcript_path": 17,
+   "best_each": 17,
+   "with_visual": 17
+  },
+  {
+   "start_sec": 1845.96,
+   "end_sec": 1908.07,
+   "gold": 18,
+   "transcript_path": 17,
+   "best_each": 17,
+   "with_visual": 17
+  },
+  {
+   "start_sec": 1903.35,
+   "end_sec": 1973.36,
+   "gold": 18,
+   "transcript_path": 23,
+   "best_each": 23,
+   "with_visual": 17
+  },
+  {
+   "start_sec": 1960.52,
+   "end_sec": 2021.54,
+   "gold": 18,
+   "transcript_path": 17,
+   "best_each": 17,
+   "with_visual": 17
+  },
+  {
+   "start_sec": 2017.38,
+   "end_sec": 2081.95,
+   "gold": 18,
+   "transcript_path": 18,
+   "best_each": 18,
+   "with_visual": 18
+  },
+  {
+   "start_sec": 2076.79,
+   "end_sec": 2141.97,
+   "gold": 19,
+   "transcript_path": 19,
+   "best_each": 19,
+   "with_visual": 19
+  },
+  {
+   "start_sec": 2136.37,
+   "end_sec": 2198.79,
+   "gold": 20,
+   "transcript_path": 20,
+   "best_each": 20,
+   "with_visual": 20
+  },
+  {
+   "start_sec": 2196.11,
+   "end_sec": 2256.76,
+   "gold": 20,
+   "transcript_path": 20,
+   "best_each": 20,
+   "with_visual": 20
+  },
+  {
+   "start_sec": 2252.34,
+   "end_sec": 2317.42,
+   "gold": 20,
+   "transcript_path": 20,
+   "best_each": 20,
+   "with_visual": 20
+  },
+  {
+   "start_sec": 2308.21,
+   "end_sec": 2368.52,
+   "gold": 20,
+   "transcript_path": 19,
+   "best_each": 19,
+   "with_visual": 20
+  },
+  {
+   "start_sec": 2364.9,
+   "end_sec": 2425.73,
+   "gold": 20,
+   "transcript_path": 20,
+   "best_each": 17,
+   "with_visual": 20
+  },
+  {
+   "start_sec": 2422.33,
+   "end_sec": 2483.78,
+   "gold": 21,
+   "transcript_path": 21,
+   "best_each": 21,
+   "with_visual": 21
+  },
+  {
+   "start_sec": 2480.98,
+   "end_sec": 2531.5,
+   "gold": 21,
+   "transcript_path": 21,
+   "best_each": 21,
+   "with_visual": 21
+  },
+  {
+   "start_sec": 2528.5,
+   "end_sec": 2591.11,
+   "gold": 14,
+   "transcript_path": 23,
+   "best_each": 23,
+   "with_visual": 23
+  },
+  {
+   "start_sec": 2588.19,
+   "end_sec": 2602.47,
+   "gold": 14,
+   "transcript_path": 23,
+   "best_each": 23,
+   "with_visual": 14
+  }
+ ],
+ "results": {
+  "transcript, path (app without visual)": {
+   "exact": 0.631578947368421,
+   "within_1": 0.868421052631579
+  },
+  "transcript, best slide per segment": {
+   "exact": 0.5789473684210527,
+   "within_1": 0.7894736842105263
+  },
+  "transcript, dense only, path": {
+   "exact": 0.7105263157894737,
+   "within_1": 0.868421052631579
+  },
+  "transcript + on-screen text, path (app)": {
+   "exact": 0.8157894736842105,
+   "within_1": 0.9736842105263158
+  }
+ }
+}
