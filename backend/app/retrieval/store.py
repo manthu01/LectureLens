@@ -10,6 +10,8 @@ from app.config import settings
 # v2: named vectors ("dense" + sparse "bm25"). Bump the suffix whenever the schema changes;
 # startup re-indexes lectures from their cached transcripts when the collection is missing.
 COLLECTION = "segments_v2"
+# Bumped on every index write, so caches keyed on it (answers) go stale when lectures change.
+index_version = 0
 MODES = ("dense", "bm25", "hybrid")
 
 
@@ -63,6 +65,8 @@ def create_collection(client: QdrantClient, dim: int) -> None:
 
 
 def delete_lecture(lecture_id: int) -> None:
+    global index_version
+    index_version += 1
     if collection_exists():
         _client().delete(
             COLLECTION,
@@ -124,6 +128,8 @@ def index_lecture(lecture, chunks: list[dict]) -> int:
     ]
     for i in range(0, len(points), 128):
         _client().upsert(COLLECTION, points=points[i : i + 128])
+    global index_version
+    index_version += 1
     return len(points)
 
 

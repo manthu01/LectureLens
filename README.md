@@ -2,7 +2,7 @@
 
 **Ctrl+F for your entire semester of lectures.** Ask a question, get an answer grounded only in what was taught, and jump to the exact second the lecturer explained it.
 
-> Status: work in progress. Search, cited answers, summaries, topic timelines, quizzes and reading the screen from the video work. Not built yet: uploading separate slide PDFs, and cropping/upscaling far-away boards.
+> Status: work in progress. Search, cited answers, summaries, topic timelines, quizzes and reading the screen from the video work. Not built yet: cropping/upscaling far-away boards.
 
 **Live demo:** https://lecturelens-app.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures; the first request after a quiet spell takes a few extra seconds while the backend starts).
 
@@ -12,6 +12,7 @@
 - **Transcribes with timestamps** using Whisper, running locally. Hindi/Hinglish lectures are translated to English during transcription.
 - **Labels every segment** as teaching, off-topic, admin or exam hint, and names its topic.
 - **Reads the screen.** Picks the key frames of the video (each page or slide at its fullest), has a vision model read the typed text, handwriting, code and diagrams on them, detects the lecture's layout (screen, screen + face cam, talking head, board), and attaches what was on screen to the transcript at that moment. Questions about something only written down, never said, can then be answered.
+- **Links uploaded slides to the lecture.** Upload the lecturer's deck (PDF or PPTX) and each transcript segment is matched to the slide being discussed; the transcript and citations link straight to that page of the PDF, and the slide text is used in search and answers.
 - **Answers questions with citations.** Each claim links to a lecture and timestamp; clicking it seeks the video.
 - **Refuses when the lectures don't cover it**, and shows the closest moments instead of guessing.
 - **Summarises each lecture** with timestamped key points and a clickable topic timeline that greys out off-topic stretches.
@@ -174,6 +175,23 @@ The on-screen text changes nothing for the 55 transcript questions. Asked end to
 
 Caveats: 57 of the 66 questions were written from the transcripts and checked by reading the transcript text, not by watching the video for each one (marked `"status": "skimmed"`). The transcripts are Whisper's English translation of Hinglish speech, so a gold answer can carry a translation error the video would reveal. The set is small. Treat these numbers as a first baseline.
 
+### Slide alignment
+
+```bash
+backend/.venv/Scripts/python backend/scripts/eval_slides.py --lecture <id>
+```
+
+Tested on MIT OpenCourseWare 6.0001 (Fall 2016) Lecture 1, a 43-minute lecture with its 35-slide PDF (indexed locally as a second course; CC BY-NC-SA). Gold labels come from the video: each key frame's text is matched to the slide that contains most of its words, and a segment's gold slide is the one on screen longest during it (35 of 45 segments have one; the rest show the instructor's Python shell or nothing readable).
+
+| Alignment | Exact slide | Within 1 slide |
+|---|---|---|
+| Embeddings only, transcript | 0.43 | 0.71 |
+| Embeddings + TF-IDF, best slide per segment, transcript | 0.49 | 0.77 |
+| Embeddings + TF-IDF, forward path, transcript (app, no screen reading) | 0.49 | 0.77 |
+| **Embeddings + TF-IDF, forward path, transcript + on-screen text (app)** | **0.74** | **0.94** |
+
+Slides are terse keyword lists, so word overlap (TF-IDF) adds to embeddings. Reading the screen helps most, but the gold labels come from the same frame reads, so that row is optimistic. This lecture was also used to choose the method, and a 60-second segment often spans two slides, which caps "exact". A held-out lecture is still to run. Results: `eval/results/slides-gold-lecture11.json`.
+
 ### Ablations
 
 ```bash
@@ -269,6 +287,7 @@ uv run pytest
 backend/app/
   ingestion/    acquire, transcribe, chunk, classify, pipeline
     visual/     frames (key frames), read (vision model + layout), align (text -> segments)
+    slides.py   uploaded PDF/PPTX: extract text, align slides to segments
   retrieval/    store (Qdrant), search (hybrid + cross-encoder score)
   generation/   llm, answer (prompt, citations, SSE stream)
   api.py        REST endpoints

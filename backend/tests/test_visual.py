@@ -94,3 +94,38 @@ def test_on_screen_text_reaches_index_and_prompt():
     assert embed_text({"text": "only speech"}) == "only speech"
     hit = {"lecture_number": 4, "lecture_title": "T", "start_sec": 0, "end_sec": 60, **c}
     assert "On screen: 1. Lots of Data" in build_prompt("q?", [hit])
+
+
+def test_answer_cache_replays_and_invalidates(monkeypatch):
+    from app.generation import answer
+    from app.retrieval import store
+
+    calls = []
+
+    def fake(course_id, question, include_off_topic=False):
+        calls.append(question)
+        yield answer._sse("sources", {"sources": []})
+        yield answer._sse("token", {"text": "Hel"})
+        yield answer._sse("token", {"text": "lo"})
+        yield answer._sse("final", {"answer": "Hello", "citations": [], "supported": True})
+
+    monkeypatch.setattr(answer, "_answer_stream", fake)
+    answer._cache.clear()
+    first = list(answer.answer_stream(1, "What is ML?"))
+    again = list(answer.answer_stream(1, "what is ml"))  # same up to case and punctuation
+    assert len(calls) == 1
+    assert again[-1] == first[-1] and '"Hello"' in again[1]  # tokens merged into one event
+
+    monkeypatch.setattr(store, "index_version", store.index_version + 1)  # a lecture was re-indexed
+    list(answer.answer_stream(1, "What is ML?"))
+    assert len(calls) == 2
+
+    def failing(course_id, question, include_off_topic=False):
+        calls.append(question)
+        yield answer._sse("error", {"message": "quota"})
+
+    monkeypatch.setattr(answer, "_answer_stream", failing)
+    list(answer.answer_stream(1, "new question"))
+    list(answer.answer_stream(1, "new question"))
+    assert calls[-2:] == ["new question", "new question"]  # errors are not cached
+    answer._cache.clear()

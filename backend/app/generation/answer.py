@@ -1,5 +1,7 @@
 import json
 import re
+import threading
+from collections import OrderedDict
 from collections.abc import Iterator
 
 from app.config import settings
@@ -131,8 +133,48 @@ def _sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
+# Answers to repeated questions are replayed instead of regenerated (saves LLM quota and time).
+# Keyed on the normalised question and the index version, so re-indexing invalidates them.
+CACHE_SIZE = 256
+_cache: OrderedDict[tuple, list[str]] = OrderedDict()
+_cache_lock = threading.Lock()
+
+
+def _cache_key(course_id: int, question: str, include_off_topic: bool) -> tuple:
+    from app.retrieval import store
+
+    norm = " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
+    return (course_id, norm, include_off_topic, store.index_version, settings.llm_model)
+
+
 def answer_stream(course_id: int, question: str, include_off_topic: bool = False) -> Iterator[str]:
-    """SSE stream: `sources`, then `token` events, then one `final` (or `error`) event."""
+    """SSE stream: `sources`, then `token` events, then one `final` (or `error`) event.
+    A question asked before (same wording up to case and punctuation) is replayed from cache."""
+    key = _cache_key(course_id, question, include_off_topic)
+    with _cache_lock:
+        cached = _cache.get(key)
+        if cached is not None:
+            _cache.move_to_end(key)
+    if cached is not None:
+        yield from cached
+        return
+    events: list[str] = []
+    for event in _answer_stream(course_id, question, include_off_topic):
+        events.append(event)
+        yield event
+    if events and events[-1].startswith("event: final"):  # errors are not cached
+        # Replay as one token event rather than many small ones.
+        tokens = [e for e in events if e.startswith("event: token")]
+        text = "".join(json.loads(e.split("data: ", 1)[1])["text"] for e in tokens)
+        rest = [e for e in events if not e.startswith("event: token")]
+        replay = rest[:-1] + ([_sse("token", {"text": text})] if text else []) + rest[-1:]
+        with _cache_lock:
+            _cache[key] = replay
+            while len(_cache) > CACHE_SIZE:
+                _cache.popitem(last=False)
+
+
+def _answer_stream(course_id: int, question: str, include_off_topic: bool = False) -> Iterator[str]:
     try:
         hits = retrieve(course_id, question, include_off_topic=include_off_topic)
         # Confidence gate: nothing relevant enough -> refuse without spending an LLM call.

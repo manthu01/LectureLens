@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Chat from "@/components/chat";
+import YouTubePlayer from "@/components/youtube-player";
 import {
   addSource,
+  type Citation,
   type CourseDetail,
   fmtTime,
   getConfig,
@@ -44,6 +46,10 @@ const LAYOUT_NAME: Record<string, string> = {
   board_far: "board (far)",
 };
 
+/** Off-topic stretches of a lecture, for "Skip off-topic". */
+const offTopic = (t: Timeline) =>
+  t.chapters.filter((c) => c.label === "off_topic").map((c) => ({ start: c.start_sec, end: c.end_sec }));
+
 const isBusy =(l: Lecture) => l.status !== "indexed" && l.status !== "failed";
 
 export default function CourseView() {
@@ -59,6 +65,12 @@ export default function CourseView() {
   const [limit, setLimit] = useState("");
   const [adding, setAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [playhead, setPlayhead] = useState(0); // seconds, reported by the player
+  const [skipFluff, setSkipFluff] = useState(false);
+  const [follow, setFollow] = useState(true); // transcript scrolls along with playback
+  // "Play all cited clips": each clip plays from its start to its end, then the next one.
+  const [queue, setQueue] = useState<{ clips: Citation[]; i: number } | null>(null);
+  const activeRow = useRef<HTMLButtonElement>(null);
 
   const refresh = useCallback(
     () =>
@@ -109,8 +121,36 @@ export default function CourseView() {
     };
   }, [lectureId, lectureIndexed]);
 
-  const seek = (id: number, start: number) =>
+  const jump = (id: number, start: number) => {
+    setPlayhead(start);
     setCurrent((prev) => ({ lectureId: id, start: Math.floor(start), nonce: (prev?.nonce ?? 0) + 1 }));
+  };
+  // A seek the user asked for ends any clip playlist.
+  const seek = (id: number, start: number) => {
+    setQueue(null);
+    jump(id, start);
+  };
+  const playClips = (clips: Citation[]) => {
+    if (!clips.length) return;
+    setQueue({ clips, i: 0 });
+    jump(clips[0].lecture_id, clips[0].start_sec);
+  };
+  const nextClip = () => {
+    if (!queue) return;
+    const i = queue.i + 1;
+    if (i >= queue.clips.length) return setQueue(null);
+    setQueue({ ...queue, i });
+    jump(queue.clips[i].lecture_id, queue.clips[i].start_sec);
+  };
+  const clip = queue?.clips[queue.i] ?? null;
+
+  // Keep the segment being played in view while following playback.
+  const activeId = segments.find(
+    (s) => s.lecture_id === current?.lectureId && playhead >= s.start_sec && playhead < s.end_sec,
+  )?.id;
+  useEffect(() => {
+    if (follow && tab === "transcript") activeRow.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeId, follow, tab]);
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
@@ -210,15 +250,30 @@ export default function CourseView() {
             <CourseNotes courseId={courseId} description={course.description} onSeek={seek} />
           ) : (
             <>
+              {clip && (
+                <div className="flex items-center gap-3 border-b border-line bg-accent-soft px-4 py-1.5 text-xs">
+                  <span className="min-w-0 flex-1 truncate">
+                    Clip {queue!.i + 1} of {queue!.clips.length}: L{clip.lecture_number} {fmtTime(clip.start_sec)}–
+                    {fmtTime(clip.end_sec)}
+                  </span>
+                  <button onClick={nextClip} className="font-medium text-accent hover:underline">
+                    {queue!.i + 1 < queue!.clips.length ? "Next" : "Finish"}
+                  </button>
+                  <button onClick={() => setQueue(null)} className="text-muted hover:text-foreground">
+                    Stop
+                  </button>
+                </div>
+              )}
               <div className="aspect-video w-full shrink-0 bg-black lg:max-h-[55vh]">
                 {lecture.video_id ? (
-                  <iframe
-                    key={`${lecture.id}-${current!.start}-${current!.nonce}`}
-                    className="h-full w-full"
-                    src={`https://www.youtube.com/embed/${lecture.video_id}?start=${current!.start}&autoplay=1&rel=0`}
-                    title={lecture.title}
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                    allowFullScreen
+                  <YouTubePlayer
+                    videoId={lecture.video_id}
+                    start={current!.start}
+                    nonce={current!.nonce}
+                    onTime={setPlayhead}
+                    skip={skipFluff && !clip && timeline?.lectureId === lecture.id ? offTopic(timeline.data) : []}
+                    stopAt={clip ? clip.end_sec : null}
+                    onStop={nextClip}
                   />
                 ) : (
                   <p className="p-6 text-sm text-stone-300">
@@ -229,7 +284,7 @@ export default function CourseView() {
               {lectureIndexed && timeline?.lectureId === lecture.id && (
                 <TimelineBar
                   timeline={timeline.data}
-                  position={current!.start}
+                  position={playhead}
                   onSeek={(start) => seek(lecture.id, start)}
                 />
               )}
@@ -267,6 +322,18 @@ export default function CourseView() {
                           .finally(() => setUploading(false));
                       }}
                     />
+                  </label>
+                )}
+                {lectureIndexed && lecture.video_id && (
+                  <label className="flex cursor-pointer items-center gap-1 text-muted" title="Jump over stretches labelled off-topic while the video plays">
+                    <input type="checkbox" checked={skipFluff} onChange={(e) => setSkipFluff(e.target.checked)} />
+                    Skip off-topic
+                  </label>
+                )}
+                {lectureIndexed && tab === "transcript" && lecture.video_id && (
+                  <label className="flex cursor-pointer items-center gap-1 text-muted" title="Scroll the transcript along with the video">
+                    <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} />
+                    Follow
                   </label>
                 )}
                 {lectureIndexed &&
@@ -312,10 +379,11 @@ export default function CourseView() {
                 {shownSegments.map((s, i) => {
                   // Show what was on screen where it changes, not under every segment.
                   const screen = s.visual_text && s.visual_text !== shownSegments[i - 1]?.visual_text ? s.visual_text : "";
-                  const active = current!.start >= Math.floor(s.start_sec) && current!.start < s.end_sec;
+                  const active = s.id === activeId;
                   return (
                     <button
                       key={s.id}
+                      ref={active ? activeRow : undefined}
                       onClick={() => seek(lecture.id, s.start_sec)}
                       className={`flex w-full gap-3 rounded px-2 py-1.5 text-left hover:bg-accent-soft ${
                         active ? "bg-accent-soft" : ""
@@ -363,6 +431,7 @@ export default function CourseView() {
             courseId={courseId}
             ready={course.lectures.some((l) => l.status === "indexed")}
             onSeek={(c) => seek(c.lecture_id, c.start_sec)}
+            onPlayAll={playClips}
           />
         </section>
       </div>

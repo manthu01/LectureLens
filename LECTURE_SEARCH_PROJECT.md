@@ -44,7 +44,7 @@ Students sit through 40+ hours of lectures per subject. When exams come, they ca
 - Exam Hints and Announcements pages.
 - Practice quiz generation and answer checking.
 - "Skip the fluff" stat: minutes of actual teaching per lecture.
-- Upload of separate slides (PDF/PPTX) and notes.
+- Upload of separate slides (PDF/PPTX) and notes. (Slides done 2026-11-27; notes not.)
 
 ### Stretch
 - Back-of-class / low-quality board handling (crop + upscale).
@@ -395,6 +395,8 @@ Plan: start with one course you know well (~20 lectures), screen-only first; the
 ## 14. Build Plan (≈4 weeks part-time)
 
 ### Status (updated 2026-11-27)
+
+**Done 2026-11-27: slide upload + alignment** (`backend/app/ingestion/slides.py`, `POST /lectures/{id}/slides?filename=` with the raw file as body, so the read-only deploy needs no multipart library; `GET /lectures/{id}/slides[/file]`). PDF via pypdf, PPTX via python-pptx (incl. speaker notes). Alignment: z-scored dense similarity + z-scored TF-IDF similarity, then a monotonic dynamic program (forward jump 0.25 sd, backward 1.0 sd); off-topic segments get no slide. Each segment stores `slide_page`/`slide_text`; slide text is embedded ("Slide: ..."), shown to the answering LLM and the cross-encoder; UI has Add slides, Slide N links (PDF #page=N) and slide numbers on citation chips. Upload on an indexed lecture re-aligns from the index (no transcript needed). Eval (`backend/scripts/eval_slides.py`, gold from frame reads): MIT 6.0001 L1 exact 0.74 / within-1 0.94 with on-screen text, 0.49/0.77 transcript only. Held-out L2 (local lecture id 12) was stopped mid-transcription by a low-memory kill; resume it, upload its slides, run eval_slides.py.
 
 **Done 2026-11-27: visual pipeline (V2)** (`backend/app/ingestion/visual/`). Downloads the 720p video-only stream; decodes keyframes only (~every 5 s) with PyAV; keeps a frame just before ink is removed (page turn / slide change / wipe) or when enough new ink has appeared since the last kept frame; pixels that change in >25% of steps (face-cam inset) are masked; consecutive near-identical frames are dropped by ink difference (an 8x8 perceptual hash was too coarse: it merged pages with new handwriting). Gemini (`VISION_MODEL`, default the LLM model) reads 6 frames per call and returns layout + text (handwriting, code, LaTeX, one-line diagram notes) + readability; a batch refused by the RECITATION filter is retried frame by frame and a still-refused frame is left empty. Lecture `layout_type` = layout on screen longest; `visual_quality_score` = time-weighted readability. Each segment gets `visual_text` = text of frames overlapping it (fuller versions of a growing page win); it is embedded as `topic. text On screen: ...`, scored by the cross-encoder, shown to the answering LLM, and shown in the transcript UI. Deviations from the plan below: no Tesseract/PaddleOCR (the course is handwriting in OneNote, which OCR reads badly, and one vision call covers layout + text); no board crop/upscale (no board lectures in the demo course); no Frame table (reads cached as JSON per lecture, like transcripts). Existing lectures processed with `backend/scripts/add_visual.py`: lectures 1-2 talking head, 3-10 facecam_screen, readability 0.89-0.98. Eval: 10 visual-only questions (`type: visual`): hybrid R@1 0.40 -> 0.90, R@5 0.70 -> 1.00; transcript questions unchanged (0.95). End to end 9/10 answered correctly, 11/11 uncovered still refused. Not done: slide PDF upload/alignment, board_far crop + upscale (no test data).
 

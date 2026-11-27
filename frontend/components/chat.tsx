@@ -44,14 +44,32 @@ function AnswerText({ text, sources, onSeek }: { text: string; sources: Citation
   );
 }
 
+/** The cited moments of an answer, in the order the answer cites them, one per moment. */
+function citedClips(text: string, sources: Citation[]): Citation[] {
+  const byTag = new Map(sources.map((s) => [s.tag, s]));
+  const seen = new Set<string>();
+  const out: Citation[] = [];
+  for (const m of text.matchAll(/\[(S\d+)\]/g)) {
+    const c = byTag.get(m[1]);
+    const key = c && `${c.lecture_id}-${c.start_sec}`;
+    if (c && key && !seen.has(key)) {
+      seen.add(key);
+      out.push(c);
+    }
+  }
+  return out;
+}
+
 export default function Chat({
   courseId,
   ready,
   onSeek,
+  onPlayAll,
 }: {
   courseId: number;
   ready: boolean;
   onSeek: (c: Citation) => void;
+  onPlayAll?: (clips: Citation[]) => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -113,6 +131,15 @@ export default function Chat({
                 <AnswerText text={m.text} sources={m.sources} onSeek={onSeek} />
               ) : (
                 <p className="text-muted">Searching your lectures…</p>
+              )}
+              {onPlayAll && m.done && !m.error && m.closest.length === 0 && citedClips(m.text, m.sources).length > 1 && (
+                <button
+                  onClick={() => onPlayAll(citedClips(m.text, m.sources))}
+                  className="mt-2 text-xs font-medium text-accent hover:underline"
+                  title="Play each cited moment in turn, like a revision reel"
+                >
+                  ▶ Play all {citedClips(m.text, m.sources).length} cited clips
+                </button>
               )}
               {m.closest.length > 0 && (
                 <div className="mt-2 border-t border-line pt-2 text-xs text-muted">
