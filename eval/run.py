@@ -52,8 +52,10 @@ def search(api: str, course: int, question: str, cfg: dict) -> list[dict]:
 
 
 def is_hit(hit: dict, q: dict) -> bool:
+    """Overlaps the gold span. Notes passages (start_sec None) have no time, so never match."""
     return (
-        hit["lecture_number"] == q["lecture"]
+        hit.get("start_sec") is not None
+        and hit["lecture_number"] == q["lecture"]
         and hit["start_sec"] < q["gold_end_sec"]
         and hit["end_sec"] > q["gold_start_sec"]
     )
@@ -75,7 +77,8 @@ def evaluate(api: str, course: int, questions: list[dict], cfg: dict) -> dict:
         if hits:
             top = hits[0]
             ts += (
-                top["lecture_number"] == q["lecture"]
+                top.get("start_sec") is not None
+                and top["lecture_number"] == q["lecture"]
                 and q["gold_start_sec"] - TIMESTAMP_TOLERANCE_SEC
                 <= top["start_sec"]
                 <= q["gold_end_sec"] + TIMESTAMP_TOLERANCE_SEC

@@ -3,6 +3,7 @@ import time
 from collections import defaultdict, deque
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session, func, select
@@ -241,6 +242,59 @@ def get_slides_file(lecture_id: int, session: Session = Depends(get_session)) ->
         "application/vnd.openxmlformats-officedocument.presentationml.presentation")
     # inline, so a PDF opens in the browser tab and #page=N jumps to the slide
     return FileResponse(path, media_type=media, content_disposition_type="inline", filename=path.name)
+
+
+MAX_NOTES_BYTES = 20 * 1024 * 1024
+NOTES_MEDIA = {".pdf": "application/pdf", ".md": "text/markdown; charset=utf-8", ".txt": "text/plain; charset=utf-8"}
+
+
+@router.post("/lectures/{lecture_id}/notes", dependencies=[Depends(writable)])
+async def upload_notes(
+    lecture_id: int, filename: str, request: Request, session: Session = Depends(get_session)
+) -> Lecture:
+    """Upload written notes for the lecture (.pdf, .md or .txt) as the raw request body, with the
+    file name as a query parameter. The notes are split into passages and indexed right away (a few
+    dozen embeddings), so they are searchable when the request returns. Replaces earlier notes."""
+    from app.ingestion import notes
+
+    lecture = _get(session, Lecture, lecture_id)
+    data = await request.body()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    if len(data) > MAX_NOTES_BYTES:
+        raise HTTPException(413, "Notes file is larger than 20 MB")
+    try:
+        passages = await run_in_threadpool(notes.save, _work_dir(lecture), filename, data)
+    except Exception as e:
+        raise HTTPException(400, f"Could not read the notes: {str(e)[:300]}")
+    try:
+        await run_in_threadpool(store.index_notes, lecture, passages)
+    except Exception as e:
+        raise HTTPException(502, f"Could not index the notes: {str(e)[:300]}")
+    lecture.notes_name = filename
+    session.add(lecture)
+    session.commit()
+    session.refresh(lecture)
+    return lecture
+
+
+@router.get("/lectures/{lecture_id}/notes")
+def get_notes(lecture_id: int, session: Session = Depends(get_session)) -> list[dict]:
+    """The notes passages: [{page, topic, text}]."""
+    from app.ingestion import notes
+
+    return notes.load(_work_dir(_get(session, Lecture, lecture_id))) or []
+
+
+@router.get("/lectures/{lecture_id}/notes/file")
+def get_notes_file(lecture_id: int, session: Session = Depends(get_session)) -> FileResponse:
+    from app.ingestion import notes
+
+    path = notes.file_path(_work_dir(_get(session, Lecture, lecture_id)))
+    if path is None:
+        raise HTTPException(404, "No notes uploaded for this lecture")
+    # inline, so a PDF opens in the browser tab and #page=N jumps to the cited page
+    return FileResponse(path, media_type=NOTES_MEDIA[path.suffix], content_disposition_type="inline", filename=path.name)
 
 
 @router.get("/lectures/{lecture_id}/transcript")

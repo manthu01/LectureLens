@@ -41,6 +41,8 @@ RRF_K = 60
 
 
 def is_hit(h: dict, q: dict) -> bool:
+    if h.get("start_sec") is None:  # a notes passage: no time to compare
+        return False
     return h["lecture_number"] == q["lecture"] and h["start_sec"] < q["gold_end_sec"] and h["end_sec"] > q["gold_start_sec"]
 
 
@@ -52,7 +54,7 @@ def metrics(ranked: list[list[dict]], answerable: list[dict]) -> dict:
         r5 += rank is not None
         rr += 1 / rank if rank else 0
         top = hits[0]
-        ts += top["lecture_number"] == q["lecture"] and q["gold_start_sec"] - TOL <= top["start_sec"] <= q["gold_end_sec"] + TOL
+        ts += top.get("start_sec") is not None and top["lecture_number"] == q["lecture"] and q["gold_start_sec"] - TOL <= top["start_sec"] <= q["gold_end_sec"] + TOL
     n = len(answerable)
     return {"recall@1": r1 / n, "recall@5": r5 / n, "mrr": rr / n, "timestamp_acc": ts / n}
 

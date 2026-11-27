@@ -20,7 +20,8 @@ Rules:
 - Excerpts are automatic transcripts and may contain small transcription errors. An excerpt may
   also have an "On screen:" part: what was written on the slide, screen or board at that moment
   (read automatically), and a "Slide N:" part: the text of the lecturer's uploaded slide matched to
-  that moment. Both count as part of that excerpt."""
+  that moment. Both count as part of that excerpt.
+- Excerpts labelled "notes" come from written notes uploaded for that lecture; cite them the same way."""
 
 OVERVIEW_PROMPT = f"""You answer a student's question about what their lectures cover, using ONLY the lecture
 overviews provided (a summary per lecture plus timestamped key points).
@@ -92,10 +93,24 @@ def fmt_time(sec: float) -> str:
     return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
 
 
+def is_notes(h: dict) -> bool:
+    """A passage of uploaded notes rather than a transcript segment (old points have no `source`)."""
+    return h.get("source") == "notes"
+
+
+def _excerpt_header(i: int, h: dict) -> str:
+    """Notes have a page instead of a time range."""
+    if is_notes(h):
+        return f"[S{i}] Lecture {h['lecture_number']} notes, page {h['page']} ({h['lecture_title']})"
+    return (
+        f"[S{i}] Lecture {h['lecture_number']}: {h['lecture_title']} "
+        f"({fmt_time(h['start_sec'])}-{fmt_time(h['end_sec'])})"
+    )
+
+
 def build_prompt(question: str, hits: list[dict]) -> str:
     blocks = [
-        f"[S{i}] Lecture {h['lecture_number']}: {h['lecture_title']} "
-        f"({fmt_time(h['start_sec'])}-{fmt_time(h['end_sec'])})\n{h['text']}"
+        f"{_excerpt_header(i, h)}\n{h['text']}"
         + (f"\nOn screen: {h['visual_text']}" if h.get("visual_text") else "")
         + (f"\nSlide {h['slide_page']}: {h['slide_text']}" if h.get("slide_text") else "")
         for i, h in enumerate(hits, 1)
@@ -126,7 +141,14 @@ def _citation(tag: int, h: dict) -> dict:
         "snippet": h["text"][:240],
         "on_screen": (h.get("visual_text") or "")[:240],
         "slide_page": h.get("slide_page"),
+        "source": h.get("source") or "transcript",
+        "page": h.get("page"),  # notes page (PDF) or passage number; None for transcript segments
     }
+
+
+def _moment(h: dict) -> tuple:
+    """Where a citation points: a time in a lecture, or a page of the lecture's notes."""
+    return (h["lecture_id"], "notes", h.get("page")) if is_notes(h) else (h["lecture_id"], h["start_sec"])
 
 
 def _sse(event: str, data: dict) -> str:
@@ -206,7 +228,7 @@ def _answer_stream(course_id: int, question: str, include_off_topic: bool = Fals
         # Different excerpts can start at the same moment (e.g. a summary and a key point); show one chip.
         unique, moments = [], set()
         for i in shown:
-            moment = (hits[i - 1]["lecture_id"], hits[i - 1]["start_sec"])
+            moment = _moment(hits[i - 1])
             if moment not in moments:
                 moments.add(moment)
                 unique.append(i)

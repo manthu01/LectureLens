@@ -13,6 +13,7 @@
 - **Labels every segment** as teaching, off-topic, admin or exam hint, and names its topic.
 - **Reads the screen.** Picks the key frames of the video (each page or slide at its fullest), has a vision model read the typed text, handwriting, code and diagrams on them, detects the lecture's layout (screen, screen + face cam, talking head, board), and attaches what was on screen to the transcript at that moment. Questions about something only written down, never said, can then be answered.
 - **Links uploaded slides to the lecture.** Upload the lecturer's deck (PDF or PPTX) and each transcript segment is matched to the slide being discussed; the transcript and citations link straight to that page of the PDF, and the slide text is used in search and answers.
+- **Searches uploaded notes too.** Upload written notes for a lecture (PDF, Markdown or plain text) and they are split into passages of about 150-250 words (by page for PDFs, by heading and paragraph otherwise) and indexed next to the transcript. Answers can cite them; a notes citation ("L4 · notes p.2") opens the notes at that page instead of seeking the video. The transcript view, timeline, summary and quiz stay transcript-only.
 - **Answers questions with citations.** Each claim links to a lecture and timestamp; clicking it seeks the video.
 - **Refuses when the lectures don't cover it**, and shows the closest moments instead of guessing.
 - **Summarises each lecture** with timestamped key points and a clickable topic timeline that greys out off-topic stretches.
@@ -79,6 +80,7 @@ Ingestion caches the transcript, the labels, the key frames and their reads on d
 | Confidence scorer | `Xenova/ms-marco-MiniLM-L-6-v2` cross-encoder (scores the hits for the refusal gate; does not reorder them) |
 | LLM | Gemini (answers and segment labels), model set in `.env` |
 | Screen reading | Key frames picked with PyAV + NumPy; read by Gemini (`VISION_MODEL`, defaults to the LLM model), 6 frames per call |
+| Uploads | Slides: pypdf, python-pptx. Notes: pypdf, Markdown/plain text. Sent as the raw request body (`POST /lectures/{id}/slides?filename=`, `POST /lectures/{id}/notes?filename=`); `GET /lectures/{id}/notes` returns the passages, `/notes/file` the file |
 | Frontend | Next.js 16, Tailwind |
 
 Every model name and key is read from `.env`.
@@ -288,6 +290,7 @@ backend/app/
   ingestion/    acquire, transcribe, chunk, classify, pipeline
     visual/     frames (key frames), read (vision model + layout), align (text -> segments)
     slides.py   uploaded PDF/PPTX: extract text, align slides to segments
+    notes.py    uploaded notes (PDF/MD/TXT): split into passages, indexed as `source: "notes"` points
   retrieval/    store (Qdrant), search (hybrid + cross-encoder score)
   generation/   llm, answer (prompt, citations, SSE stream)
   api.py        REST endpoints

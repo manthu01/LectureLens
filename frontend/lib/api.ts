@@ -14,6 +14,7 @@ export type Lecture = {
   error: string;
   layout_type?: string; // from the visual pipeline; "" if it never ran
   slides_name?: string; // uploaded slides file name; "" if none
+  notes_name?: string; // uploaded notes file name; "" if none
   visual_quality_score?: number | null;
 };
 
@@ -52,12 +53,18 @@ export type Citation = {
   lecture_number: number;
   lecture_title: string;
   video_id: string;
-  start_sec: number;
-  end_sec: number;
+  start_sec: number | null; // null for notes citations (no time in the video)
+  end_sec: number | null;
   snippet: string;
   on_screen?: string;
   slide_page?: number | null;
+  source?: "transcript" | "notes";
+  page?: number | null; // notes page (PDF) or passage number
 };
+
+/** A clip in the video, i.e. not a passage of the lecture's uploaded notes. */
+export type Clip = Citation & { start_sec: number; end_sec: number };
+export const isClip = (c: Citation): c is Clip => c.source !== "notes" && c.start_sec !== null && c.end_sec !== null;
 
 export type FinalAnswer = { answer: string; citations: Citation[]; supported: boolean };
 
@@ -92,9 +99,12 @@ export const getAnnouncements = (courseId: number) => req<Segment[]>(`/courses/$
 export const slidesUrl = (lectureId: number, page?: number | null) =>
   `${API}/lectures/${lectureId}/slides/file${page ? `#page=${page}` : ""}`;
 
-/** Uploads a .pdf/.pptx as the raw body; the backend then links each segment to a slide. */
-export async function uploadSlides(lectureId: number, file: File): Promise<Lecture> {
-  const res = await fetch(`${API}/lectures/${lectureId}/slides?filename=${encodeURIComponent(file.name)}`, {
+export const notesUrl = (lectureId: number, page?: number | null) =>
+  `${API}/lectures/${lectureId}/notes/file${page ? `#page=${page}` : ""}`;
+
+/** Uploads a file as the raw body with its name as a query parameter (no multipart on the backend). */
+async function uploadFile(path: string, file: File): Promise<Lecture> {
+  const res = await fetch(`${API}${path}?filename=${encodeURIComponent(file.name)}`, {
     method: "POST",
     headers: { "Content-Type": "application/octet-stream" },
     body: file,
@@ -105,6 +115,12 @@ export async function uploadSlides(lectureId: number, file: File): Promise<Lectu
   }
   return res.json();
 }
+
+/** Uploads a .pdf/.pptx; the backend then links each segment to a slide. */
+export const uploadSlides = (lectureId: number, file: File) => uploadFile(`/lectures/${lectureId}/slides`, file);
+
+/** Uploads notes (.pdf/.md/.txt); they are searchable and citable once this resolves. */
+export const uploadNotes = (lectureId: number, file: File) => uploadFile(`/lectures/${lectureId}/notes`, file);
 
 export const retryLecture =(lectureId: number) => req<Lecture>(`/lectures/${lectureId}/retry`, {});
 

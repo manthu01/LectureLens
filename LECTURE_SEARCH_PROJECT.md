@@ -44,7 +44,7 @@ Students sit through 40+ hours of lectures per subject. When exams come, they ca
 - Exam Hints and Announcements pages.
 - Practice quiz generation and answer checking.
 - "Skip the fluff" stat: minutes of actual teaching per lecture.
-- Upload of separate slides (PDF/PPTX) and notes. (Slides done 2026-11-27; notes not.)
+- Upload of separate slides (PDF/PPTX) and notes. (Slides and notes done 2026-11-27.)
 
 ### Stretch
 - Back-of-class / low-quality board handling (crop + upscale).
@@ -395,6 +395,8 @@ Plan: start with one course you know well (~20 lectures), screen-only first; the
 ## 14. Build Plan (≈4 weeks part-time)
 
 ### Status (updated 2026-11-27)
+
+**Done 2026-11-27: notes upload** (`backend/app/ingestion/notes.py`, `POST /lectures/{id}/notes?filename=` raw body, max 20 MB; `GET /lectures/{id}/notes[/file]`). PDF/MD/TXT notes are split into ~150-250-word passages (per page for PDF, by heading/paragraph otherwise) and indexed synchronously in the same collection as `source: "notes"` points (`page`, start/end = null); search and answers use them, `lecture_segments` (transcript, timeline, summary, quiz) excludes them, re-indexing a lecture's transcript keeps them, and a rebuilt collection gets them back from `notes.json`. Citations show "L4 · notes p.2" and open the file at that page; "Play all cited clips" skips them. Not evaluated on real notes yet.
 
 **Done 2026-11-27: slide upload + alignment** (`backend/app/ingestion/slides.py`, `POST /lectures/{id}/slides?filename=` with the raw file as body, so the read-only deploy needs no multipart library; `GET /lectures/{id}/slides[/file]`). PDF via pypdf, PPTX via python-pptx (incl. speaker notes). Alignment: z-scored dense similarity + z-scored TF-IDF similarity, then a monotonic dynamic program (forward jump 0.25 sd, backward 1.0 sd); off-topic segments get no slide. Each segment stores `slide_page`/`slide_text`; slide text is embedded ("Slide: ..."), shown to the answering LLM and the cross-encoder; UI has Add slides, Slide N links (PDF #page=N) and slide numbers on citation chips. Upload on an indexed lecture re-aligns from the index (no transcript needed). Eval (`backend/scripts/eval_slides.py`, gold from frame reads): MIT 6.0001 L1 exact 0.74 / within-1 0.94 with on-screen text, 0.49/0.77 transcript only. Held-out L2 (local lecture id 12) was stopped mid-transcription by a low-memory kill; resume it, upload its slides, run eval_slides.py.
 

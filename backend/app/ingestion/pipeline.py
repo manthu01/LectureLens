@@ -49,6 +49,19 @@ def attach_slides(chunks: list[dict], work_dir) -> list[dict]:
     return slides.align(chunks, deck, store.embed_dense) if deck else chunks
 
 
+def reindex_notes(lecture: Lecture, work_dir) -> None:
+    """Index the lecture's uploaded notes (if any) from notes.json. index_lecture keeps notes
+    points, but after a schema change the collection is rebuilt from scratch, so re-add them here."""
+    from app.ingestion import notes
+
+    try:  # the transcript is indexed already; missing notes must not fail the lecture
+        passages = notes.load(work_dir)
+        if passages:
+            store.index_notes(lecture, passages)
+    except Exception:
+        log.warning("Re-indexing notes failed for lecture %s", lecture.id, exc_info=True)
+
+
 def relink_slides(lecture_id: int) -> None:
     """Re-align an indexed lecture's segments to newly uploaded slides and re-index them.
     Works from the index itself, so no transcript or video is needed."""
@@ -109,6 +122,7 @@ def run_ingest(lecture_id: int) -> None:
             n = store.index_lecture(lecture, chunks)
             if n == 0:
                 raise RuntimeError("No speech found in this video")
+            reindex_notes(lecture, work_dir)
             _set(session, lecture, status="indexed")
             try:  # nice-to-have; the summary endpoint retries on demand if this fails
                 _set(session, lecture, summary=json.dumps(derive.summarize(chunks), ensure_ascii=False))

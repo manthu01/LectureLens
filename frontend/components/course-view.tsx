@@ -7,7 +7,7 @@ import Chat from "@/components/chat";
 import YouTubePlayer from "@/components/youtube-player";
 import {
   addSource,
-  type Citation,
+  type Clip,
   type CourseDetail,
   fmtTime,
   getConfig,
@@ -17,7 +17,9 @@ import {
   type Lecture,
   retryLecture,
   type Segment,
+  notesUrl,
   slidesUrl,
+  uploadNotes,
   uploadSlides,
   type Timeline,
 } from "@/lib/api";
@@ -65,11 +67,12 @@ export default function CourseView() {
   const [limit, setLimit] = useState("");
   const [adding, setAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingNotes, setUploadingNotes] = useState(false);
   const [playhead, setPlayhead] = useState(0); // seconds, reported by the player
   const [skipFluff, setSkipFluff] = useState(false);
   const [follow, setFollow] = useState(true); // transcript scrolls along with playback
   // "Play all cited clips": each clip plays from its start to its end, then the next one.
-  const [queue, setQueue] = useState<{ clips: Citation[]; i: number } | null>(null);
+  const [queue, setQueue] = useState<{ clips: Clip[]; i: number } | null>(null);
   const activeRow = useRef<HTMLButtonElement>(null);
 
   const refresh = useCallback(
@@ -130,7 +133,7 @@ export default function CourseView() {
     setQueue(null);
     jump(id, start);
   };
-  const playClips = (clips: Citation[]) => {
+  const playClips = (clips: Clip[]) => {
     if (!clips.length) return;
     setQueue({ clips, i: 0 });
     jump(clips[0].lecture_id, clips[0].start_sec);
@@ -302,6 +305,41 @@ export default function CourseView() {
                   >
                     Slides
                   </a>
+                )}
+                {lecture.notes_name && (
+                  <a
+                    href={notesUrl(lecture.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={lecture.notes_name}
+                    className="text-muted hover:text-foreground"
+                  >
+                    Notes
+                  </a>
+                )}
+                {readOnly === false && (
+                  <label
+                    className="cursor-pointer text-muted hover:text-foreground"
+                    title="Upload written notes for this lecture (.pdf, .md or .txt); they are searched and cited alongside the transcript"
+                  >
+                    {uploadingNotes ? "Uploading…" : lecture.notes_name ? "Replace notes" : "Add notes"}
+                    <input
+                      type="file"
+                      accept=".pdf,.md,.txt"
+                      className="hidden"
+                      disabled={uploadingNotes}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        setUploadingNotes(true);
+                        uploadNotes(lecture.id, file)
+                          .then(refresh)
+                          .catch((err: Error) => alert(err.message))
+                          .finally(() => setUploadingNotes(false));
+                      }}
+                    />
+                  </label>
                 )}
                 {readOnly === false && lectureIndexed && (
                   <label className="cursor-pointer text-muted hover:text-foreground" title="Upload this lecture's slides (.pdf or .pptx)">

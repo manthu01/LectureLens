@@ -34,6 +34,7 @@ class Lecture(SQLModel, table=True):
     layout_type: str = ""
     visual_quality_score: float | None = None  # mean readability (0..1) of the frames with content
     slides_name: str = ""  # original file name of uploaded slides (PDF/PPTX), "" if none
+    notes_name: str = ""  # original file name of uploaded notes (PDF/MD/TXT), "" if none
     created_at: datetime = Field(default_factory=_now)
 
 
@@ -50,6 +51,7 @@ def init_db() -> None:
         "layout_type": "TEXT NOT NULL DEFAULT ''",
         "visual_quality_score": "FLOAT",
         "slides_name": "TEXT NOT NULL DEFAULT ''",
+        "notes_name": "TEXT NOT NULL DEFAULT ''",
     }
     with engine.begin() as conn:
         existing = {c["name"] for c in inspect(conn).get_columns("lecture")}
