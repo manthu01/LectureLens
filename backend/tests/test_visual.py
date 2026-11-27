@@ -1,7 +1,10 @@
 import numpy as np
+import pytest
 
 from app.generation.answer import build_prompt
+from app.generation.llm import Blocked
 from app.ingestion.visual.align import visual_text_for
+from app.ingestion.visual.enhance import OUT_WIDTH, content_box, enhance
 from app.ingestion.visual.frames import SMALL, select
 from app.ingestion.visual.read import lecture_layout, parse_reads
 from app.retrieval.store import embed_text
@@ -129,3 +132,113 @@ def test_answer_cache_replays_and_invalidates(monkeypatch):
     list(answer.answer_stream(1, "new question"))
     assert calls[-2:] == ["new question", "new question"]  # errors are not cached
     answer._cache.clear()
+
+
+def _far_board(seed: int = 0) -> np.ndarray:
+    """A dark, noisy 1280x720 classroom with a small bright board holding dark writing."""
+    rng = np.random.default_rng(seed)
+    g = np.clip(rng.normal(35, 8, (720, 1280)), 0, 255)
+    g[250:450, 500:820] = 215
+    for k in range(6):
+        g[275 + 28 * k : 280 + 28 * k, 530 : 700 + 15 * k] = 40
+    return g.astype(np.int16)
+
+
+def _save_jpeg(g: np.ndarray, path):
+    from PIL import Image
+
+    Image.fromarray(g.astype(np.uint8)).save(path)
+
+
+def test_content_box_finds_far_board():
+    box = content_box(_far_board())
+    assert box is not None
+    x0, y0, x1, y1 = box
+    assert x0 <= 500 and y0 <= 250 and x1 >= 820 and y1 >= 450  # the whole board
+    assert x0 >= 400 and y0 >= 150 and x1 <= 920 and y1 <= 550  # and not much of the room
+
+
+def test_content_box_none_without_a_region():
+    rng = np.random.default_rng(1)
+    assert content_box(np.clip(rng.normal(35, 8, (720, 1280)), 0, 255).astype(np.int16)) is None  # dark room
+    assert content_box(np.full((720, 1280), 240, dtype=np.int16)) is None  # blank page
+    full = np.full((720, 1280), 240, dtype=np.int16)
+    for y in range(40, 690, 25):  # writing all over the frame: a crop gains nothing
+        full[y : y + 4, 40:1240] = 20
+    assert content_box(full) is None
+
+
+def test_enhance_upscales_crop():
+    from PIL import Image
+
+    out = enhance(Image.fromarray(_far_board().astype(np.uint8)), (480, 230, 840, 470))
+    assert out.width == OUT_WIDTH and abs(out.height - round(240 * OUT_WIDTH / 360)) <= 1
+
+
+def test_read_frames_enhances_hard_frames_once(tmp_path, monkeypatch):
+    from app.ingestion.visual import read
+
+    _save_jpeg(_far_board(), tmp_path / "a.jpg")  # far board
+    _save_jpeg(_far_board(2), tmp_path / "b.jpg")  # far board whose crop the model refuses
+    _save_jpeg(np.full((720, 1280), 240), tmp_path / "c.jpg")  # low readability, nothing to crop
+    _save_jpeg(np.full((720, 1280), 240), tmp_path / "d.jpg")  # clean screen
+    frames = [{"file": f"{n}.jpg", "start_sec": 10.0 * i, "end_sec": 10.0 * i + 10} for i, n in enumerate("abcd")]
+    calls = []
+
+    def fake(system, prompt, schema, images=(), model=""):
+        calls.append(len(images))
+        if len(calls) == 1:  # first read: all four frames in one call
+            return [
+                {"i": 0, "layout": "board_far", "text": "blur", "readable": 0.2},
+                {"i": 1, "layout": "board_far", "text": "blur", "readable": 0.4},
+                {"i": 2, "layout": "board_close", "text": "", "readable": 0.1},
+                {"i": 3, "layout": "screen_only", "text": "Slide", "readable": 0.95},
+            ]
+        if len(calls) == 3:  # crop of a, alone after the batch of two crops was refused
+            return [{"i": 0, "layout": "board_close", "text": "x = 1", "readable": 0.8}]
+        raise Blocked("RECITATION")
+
+    monkeypatch.setattr(read, "complete_json", fake)
+    out = {r["file"]: r for r in read.read_frames(frames, tmp_path)}
+    assert calls == [4, 2, 1, 1]
+    assert out["a.jpg"] == {**frames[0], "layout": "board_far", "text": "x = 1", "readable": 0.8, "enhanced": True}
+    assert out["b.jpg"]["text"] == "blur" and out["b.jpg"]["enhanced"] is False and "blocked" not in out["b.jpg"]
+    assert out["c.jpg"]["enhanced"] is False  # tried, but no content region, so no call
+    assert "enhanced" not in out["d.jpg"]
+
+    def no_call(*a, **k):
+        raise AssertionError("cached and already-enhanced frames must not be read again")
+
+    monkeypatch.setattr(read, "complete_json", no_call)
+    assert {r["file"]: r for r in read.read_frames(frames, tmp_path)} == out
+
+
+def test_rate_limit_in_second_read_propagates_and_resumes(tmp_path, monkeypatch):
+    from app.ingestion.visual import read
+
+    _save_jpeg(_far_board(), tmp_path / "a.jpg")
+    frames = [{"file": "a.jpg", "start_sec": 0.0, "end_sec": 10.0}]
+    calls = []
+
+    def fake(system, prompt, schema, images=(), model=""):
+        calls.append(1)
+        if len(calls) == 1:
+            return [{"i": 0, "layout": "board_far", "text": "blur", "readable": 0.2}]
+        raise RuntimeError("429 RESOURCE_EXHAUSTED")
+
+    monkeypatch.setattr(read, "complete_json", fake)
+    with pytest.raises(RuntimeError):
+        read.read_frames(frames, tmp_path)
+    # The first read was saved; the rerun only makes the enhanced read.
+    calls.clear()
+    monkeypatch.setattr(read, "complete_json", lambda *a, **k: calls.append(1) or [
+        {"i": 0, "layout": "board_close", "text": "y", "readable": 0.7}])
+    assert read.read_frames(frames, tmp_path)[0]["text"] == "y" and len(calls) == 1
+
+
+def test_visual_text_skips_unreadable_frames():
+    reads = [
+        {"start_sec": 0, "end_sec": 50, "text": "guessed scribble", "readable": 0.2},
+        {"start_sec": 0, "end_sec": 50, "text": "Clear title", "readable": 0.9},
+    ]
+    assert visual_text_for(10, 40, reads) == "Clear title"

@@ -2,7 +2,7 @@
 
 **Ctrl+F for your entire semester of lectures.** Ask a question, get an answer grounded only in what was taught, and jump to the exact second the lecturer explained it.
 
-> Status: work in progress. Search, cited answers, summaries, topic timelines, quizzes and reading the screen from the video work. Not built yet: cropping/upscaling far-away boards.
+> Status: work in progress. Search, cited answers, summaries, topic timelines, quizzes and reading the screen from the video work. Cropping/upscaling far-away boards is built but untested on real board footage (the demo courses have no board lectures).
 
 **Live demo:** https://lecturelens-app.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures; the first request after a quiet spell takes a few extra seconds while the backend starts).
 
@@ -11,7 +11,7 @@
 - **Ingests lectures** from a YouTube video, a whole playlist, or a local media file.
 - **Transcribes with timestamps** using Whisper, running locally. Hindi/Hinglish lectures are translated to English during transcription.
 - **Labels every segment** as teaching, off-topic, admin or exam hint, and names its topic.
-- **Reads the screen.** Picks the key frames of the video (each page or slide at its fullest), has a vision model read the typed text, handwriting, code and diagrams on them, detects the lecture's layout (screen, screen + face cam, talking head, board), and attaches what was on screen to the transcript at that moment. Questions about something only written down, never said, can then be answered.
+- **Reads the screen.** Picks the key frames of the video (each page or slide at its fullest), has a vision model read the typed text, handwriting, code and diagrams on them, detects the lecture's layout (screen, screen + face cam, talking head, board), and attaches what was on screen to the transcript at that moment. Questions about something only written down, never said, can then be answered. A frame that is hard to read (a board filmed from the back of the room) is cropped to the writing, upscaled and read again, and the better read is kept; a frame that stays unreadable adds no text, so answers there rely on the speech. The lecture list shows each lecture's layout and how readable its screen was, and flags lectures whose board was hard to read.
 - **Links uploaded slides to the lecture.** Upload the lecturer's deck (PDF or PPTX) and each transcript segment is matched to the slide being discussed; the transcript and citations link straight to that page of the PDF, and the slide text is used in search and answers.
 - **Answers questions with citations.** Each claim links to a lecture and timestamp; clicking it seeks the video.
 - **Refuses when the lectures don't cover it**, and shows the closest moments instead of guessing.
@@ -78,7 +78,7 @@ Ingestion caches the transcript, the labels, the key frames and their reads on d
 | Vector store | Qdrant: dense + BM25 sparse vectors, fused with RRF. Embedded on disk locally, Qdrant Cloud when deployed |
 | Confidence scorer | `Xenova/ms-marco-MiniLM-L-6-v2` cross-encoder (scores the hits for the refusal gate; does not reorder them) |
 | LLM | Gemini (answers and segment labels), model set in `.env` |
-| Screen reading | Key frames picked with PyAV + NumPy; read by Gemini (`VISION_MODEL`, defaults to the LLM model), 6 frames per call |
+| Screen reading | Key frames picked with PyAV + NumPy; read by Gemini (`VISION_MODEL`, defaults to the LLM model), 6 frames per call. Hard-to-read frames: cropped to the ink with NumPy, upscaled with Pillow (LANCZOS, autocontrast, unsharp mask), read again |
 | Frontend | Next.js 16, Tailwind |
 
 Every model name and key is read from `.env`.
@@ -286,7 +286,8 @@ uv run pytest
 ```
 backend/app/
   ingestion/    acquire, transcribe, chunk, classify, pipeline
-    visual/     frames (key frames), read (vision model + layout), align (text -> segments)
+    visual/     frames (key frames), read (vision model + layout), enhance (crop + upscale
+                hard-to-read frames), align (text -> segments)
     slides.py   uploaded PDF/PPTX: extract text, align slides to segments
   retrieval/    store (Qdrant), search (hybrid + cross-encoder score)
   generation/   llm, answer (prompt, citations, SSE stream)
