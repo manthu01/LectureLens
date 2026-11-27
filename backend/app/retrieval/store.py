@@ -1,4 +1,10 @@
-"""Embedding + Qdrant: indexing, dense/BM25/hybrid search, segment lookup."""
+"""Embedding + Qdrant: indexing, dense/BM25/hybrid search, segment lookup.
+
+Two kinds of points share the collection: transcript segments (no `source` field, or
+`source: "transcript"`; they have start_sec/end_sec) and passages of uploaded notes
+(`source: "notes"`, with `page` and start_sec/end_sec = None). Search returns both; lecture_segments
+returns transcript segments only, since the transcript view, timeline, summary and quiz need times.
+"""
 
 import uuid
 from functools import lru_cache
@@ -61,16 +67,31 @@ def create_collection(client: QdrantClient, dim: int) -> None:
     )
     for field in ("course_id", "lecture_id"):
         client.create_payload_index(COLLECTION, field, models.PayloadSchemaType.INTEGER)
-    client.create_payload_index(COLLECTION, "label", models.PayloadSchemaType.KEYWORD)
+    for field in ("label", "source"):
+        client.create_payload_index(COLLECTION, field, models.PayloadSchemaType.KEYWORD)
 
 
-def delete_lecture(lecture_id: int) -> None:
+NOTES = _is("source", "notes")
+
+
+def _lecture_filter(lecture_id: int, source: str | None) -> models.Filter:
+    """Points of a lecture: all of them (source None), its transcript segments, or its notes.
+    Transcript points written before notes existed have no `source`, so "transcript" means "not notes"."""
+    must = [_is("lecture_id", lecture_id)]
+    if source == "notes":
+        return models.Filter(must=must + [NOTES])
+    if source == "transcript":
+        return models.Filter(must=must, must_not=[NOTES])
+    return models.Filter(must=must)
+
+
+def delete_lecture(lecture_id: int, source: str | None = None) -> None:
+    """Delete a lecture's points: all, or only "transcript" or "notes" ones."""
     global index_version
     index_version += 1
     if collection_exists():
         _client().delete(
-            COLLECTION,
-            points_selector=models.FilterSelector(filter=models.Filter(must=[_is("lecture_id", lecture_id)])),
+            COLLECTION, points_selector=models.FilterSelector(filter=_lecture_filter(lecture_id, source))
         )
 
 
@@ -93,21 +114,33 @@ def embed_dense(texts: list[str]):
     return v / np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-12)
 
 
-def index_lecture(lecture, chunks: list[dict]) -> int:
-    """Replace all segments of a lecture in the index. Chunks may carry `label`, `topic`,
-    `visual_text` (what was on screen) and `slide_page`/`slide_text` (aligned uploaded slide)."""
-    if not chunks:
-        return 0
-    texts = [embed_text(c) for c in chunks]
+def _vectors(texts: list[str]) -> list[dict]:
     dense = [v.tolist() for v in _dense().embed(texts)]
     sparse = [_sv(e) for e in _sparse().embed(texts)]
     _ensure_collection(len(dense[0]))
-    delete_lecture(lecture.id)
+    return [{"dense": d, "bm25": s} for d, s in zip(dense, sparse)]
+
+
+def _upsert(points: list[models.PointStruct]) -> None:
+    for i in range(0, len(points), 128):
+        _client().upsert(COLLECTION, points=points[i : i + 128])
+    global index_version
+    index_version += 1
+
+
+def index_lecture(lecture, chunks: list[dict]) -> int:
+    """Replace the transcript segments of a lecture in the index (its notes stay). Chunks may carry
+    `label`, `topic`, `visual_text` (what was on screen) and `slide_page`/`slide_text` (aligned slide)."""
+    if not chunks:
+        return 0
+    vectors = _vectors([embed_text(c) for c in chunks])
+    delete_lecture(lecture.id, "transcript")
     points = [
         models.PointStruct(
             id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"lecture/{lecture.id}/{i}")),
-            vector={"dense": d, "bm25": s},
+            vector=v,
             payload={
+                "source": "transcript",
                 "course_id": lecture.course_id,
                 "lecture_id": lecture.id,
                 "lecture_number": lecture.number,
@@ -124,19 +157,53 @@ def index_lecture(lecture, chunks: list[dict]) -> int:
                 "slide_text": c.get("slide_text", ""),
             },
         )
-        for i, (c, d, s) in enumerate(zip(chunks, dense, sparse))
+        for i, (c, v) in enumerate(zip(chunks, vectors))
     ]
-    for i in range(0, len(points), 128):
-        _client().upsert(COLLECTION, points=points[i : i + 128])
-    global index_version
-    index_version += 1
+    _upsert(points)
+    return len(points)
+
+
+def index_notes(lecture, passages: list[dict]) -> int:
+    """Replace the notes passages of a lecture in the index (its transcript stays).
+    Passages are [{page, topic, text}] from ingestion.notes. Ids are derived from
+    "lecture/{id}/notes/{i}", so they never collide with transcript ids ("lecture/{id}/{i}")."""
+    passages = [p for p in passages if p.get("text", "").strip()]
+    if not passages:
+        delete_lecture(lecture.id, "notes")
+        return 0
+    vectors = _vectors([embed_text(p) for p in passages])
+    delete_lecture(lecture.id, "notes")
+    points = [
+        models.PointStruct(
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"lecture/{lecture.id}/notes/{i}")),
+            vector=v,
+            payload={
+                "source": "notes",
+                "course_id": lecture.course_id,
+                "lecture_id": lecture.id,
+                "lecture_number": lecture.number,
+                "lecture_title": lecture.title,
+                "video_id": lecture.video_id,
+                "index": i,
+                "page": p["page"],
+                "start_sec": None,  # notes have no time in the video
+                "end_sec": None,
+                "text": p["text"],
+                "label": "teaching",
+                "topic": p.get("topic", ""),
+            },
+        )
+        for i, (p, v) in enumerate(zip(passages, vectors))
+    ]
+    _upsert(points)
     return len(points)
 
 
 def search(
     course_id: int, query: str, k: int, mode: str = "hybrid", include_off_topic: bool = False
 ) -> list[dict]:
-    """Top-k segments of a course. Returns payload dicts with `id` and `score` added."""
+    """Top-k points of a course (transcript segments and notes passages). Returns payload dicts
+    with `id` and `score` added."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}")
     if not collection_exists():
@@ -184,8 +251,10 @@ def _scroll(flt: models.Filter) -> list[dict]:
 
 
 def lecture_segments(lecture_id: int) -> list[dict]:
-    return _scroll(models.Filter(must=[_is("lecture_id", lecture_id)]))
+    """Transcript segments of a lecture in time order (notes passages excluded)."""
+    return _scroll(_lecture_filter(lecture_id, "transcript"))
 
 
 def course_segments_by_label(course_id: int, label: str) -> list[dict]:
-    return _scroll(models.Filter(must=[_is("course_id", course_id), _is("label", label)]))
+    """Transcript segments of a course with a label (exam hints, announcements)."""
+    return _scroll(models.Filter(must=[_is("course_id", course_id), _is("label", label)], must_not=[NOTES]))

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ask, type Citation, fmtTime } from "@/lib/api";
+import { ask, type Citation, type Clip, fmtTime, isClip, notesUrl } from "@/lib/api";
 
 type Message =
   | { role: "user"; text: string }
@@ -14,14 +14,30 @@ type Message =
       error?: string;
     };
 
-function Chip({ c, onSeek }: { c: Citation; onSeek: (c: Citation) => void }) {
+const CHIP =
+  "mx-0.5 inline-flex items-center rounded bg-accent-soft px-1.5 py-0.5 align-baseline font-mono text-xs text-accent hover:underline";
+
+/** A citation: seeks the video to the cited moment, or opens the cited page of the lecture's notes. */
+function Chip({ c, onSeek }: { c: Citation; onSeek: (c: Clip) => void }) {
+  if (!isClip(c))
+    return (
+      <a
+        href={notesUrl(c.lecture_id, c.page)}
+        target="_blank"
+        rel="noreferrer"
+        title={`${c.lecture_title}\n\nNotes: ${c.snippet}`}
+        className={CHIP}
+      >
+        L{c.lecture_number} · notes{c.page ? ` p.${c.page}` : ""}
+      </a>
+    );
   return (
     <button
       onClick={() => onSeek(c)}
       title={[c.lecture_title, c.slide_page ? `Slide ${c.slide_page}` : "", c.on_screen ? `On screen: ${c.on_screen}` : ""]
         .filter(Boolean)
         .join("\n\n")}
-      className="mx-0.5 inline-flex items-center rounded bg-accent-soft px-1.5 py-0.5 align-baseline font-mono text-xs text-accent hover:underline"
+      className={CHIP}
     >
       L{c.lecture_number} · {fmtTime(c.start_sec)}
       {c.slide_page ? ` · slide ${c.slide_page}` : ""}
@@ -30,7 +46,7 @@ function Chip({ c, onSeek }: { c: Citation; onSeek: (c: Citation) => void }) {
 }
 
 /** Renders answer text, turning [S#] tags into clickable timestamp chips. */
-function AnswerText({ text, sources, onSeek }: { text: string; sources: Citation[]; onSeek: (c: Citation) => void }) {
+function AnswerText({ text, sources, onSeek }: { text: string; sources: Citation[]; onSeek: (c: Clip) => void }) {
   const byTag = new Map(sources.map((s) => [s.tag, s]));
   return (
     <p className="whitespace-pre-wrap leading-relaxed">
@@ -44,11 +60,12 @@ function AnswerText({ text, sources, onSeek }: { text: string; sources: Citation
   );
 }
 
-/** The cited moments of an answer, in the order the answer cites them, one per moment. */
-function citedClips(text: string, sources: Citation[]): Citation[] {
-  const byTag = new Map(sources.map((s) => [s.tag, s]));
+/** The cited moments of an answer, in the order the answer cites them, one per moment.
+ * Notes citations have no moment in the video, so they are left out. */
+function citedClips(text: string, sources: Citation[]): Clip[] {
+  const byTag = new Map(sources.filter(isClip).map((s) => [s.tag, s]));
   const seen = new Set<string>();
-  const out: Citation[] = [];
+  const out: Clip[] = [];
   for (const m of text.matchAll(/\[(S\d+)\]/g)) {
     const c = byTag.get(m[1]);
     const key = c && `${c.lecture_id}-${c.start_sec}`;
@@ -68,8 +85,8 @@ export default function Chat({
 }: {
   courseId: number;
   ready: boolean;
-  onSeek: (c: Citation) => void;
-  onPlayAll?: (clips: Citation[]) => void;
+  onSeek: (c: Clip) => void;
+  onPlayAll?: (clips: Clip[]) => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
