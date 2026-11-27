@@ -4,7 +4,7 @@
 
 > Status: work in progress. Search, cited answers, summaries, topic timelines, quizzes and reading the screen from the video work. Cropping/upscaling far-away boards is built but untested on real board footage (the demo courses have no board lectures).
 
-**Live demo:** https://lecturelens-app.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures; the first request after a quiet spell takes a few extra seconds while the backend starts).
+**Live demo:** https://lecturelens-app.vercel.app (read-only, over CampusX's "100 Days of Machine Learning" lectures 1–10 and MIT OpenCourseWare 6.0001 lectures 1–2 with their slides; the first request after a quiet spell takes a few extra seconds while the backend starts).
 
 ## What it does
 

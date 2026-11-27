@@ -396,6 +396,31 @@ Plan: start with one course you know well (~20 lectures), screen-only first; the
 
 ### Status (updated 2026-11-27)
 
+#### Resume here (2026-11-27, end of session)
+
+**State:** everything in MVP and V2 is built, committed (main, last commit 2f1a7c3 + this doc update) and deployed. Live demo: https://lecturelens-app.vercel.app (frontend, auto-deploys on push to main) over https://lecturelens-api.vercel.app (backend, deployed by hand, see below). Two courses: course 1 = CampusX "100 Days of ML" lectures 1-10 (Hinglish, translated); course 2 = MIT OCW 6.0001 Fall 2016 lectures 1-2 (English, with the instructor's slide PDFs uploaded and aligned). 50 backend tests pass (+1 opt-in slow end-to-end test: `LECTURELENS_SLOW=1`).
+
+**What exists (one line each, details in the sections below and the README):**
+- Ingest: yt-dlp audio -> faster-whisper small (translate) -> 60 s chunks -> Gemini labels (teaching/off_topic/admin/exam_hint + topic) -> visual pipeline -> slides alignment -> embed (bge-small + BM25) -> Qdrant. Every step caches to `data/courses/<course>/<lecture>/`.
+- Visual pipeline (`backend/app/ingestion/visual/`): 720p video -> key frames by ink change (face cam masked) -> Gemini reads 6 frames/call (text, handwriting, diagrams, layout, readability) -> hard frames cropped+upscaled and re-read (`enhance.py`) -> text attached to overlapping segments (`align.py`, frames with readability < 0.3 ignored). Existing lectures: `backend/scripts/add_visual.py`.
+- Slides (`slides.py`) and notes (`notes.py`) upload: raw-body POST endpoints, disabled on the read-only demo.
+- Answers: hybrid search, MiniLM cross-encoder score gate (0.01) for refusals, Gemini answer with [S#] citations, overview fallback from summaries, in-memory answer cache keyed on `store.index_version`.
+- Frontend: YouTube IFrame API player (`frontend/components/youtube-player.tsx`): seek in place, transcript follows playback, "Skip off-topic", "Play all cited clips"; transcript shows On screen text and Slide N links; citation chips show slide / notes page.
+
+**Results to quote:** retrieval hybrid R@1 0.95 on 55 transcript questions (10 lectures); visual-only questions R@1 0.40 -> 0.90 with screen reading; answer quality (55/55 graded, Gemini judge): 121/122 claims supported, 54/55 match gold, judge agrees with hand labels 20/20 faithful, 17/20 gold; slide alignment held-out MIT L2: 0.82 exact / 0.97 within one slide with screen reading (0.63/0.87 transcript only).
+
+**How to redeploy the backend** (after changing backend code or data): stop any local server (embedded Qdrant allows one process), `cd backend && .venv/Scripts/python scripts/make_snapshot.py`, then `cp -r backend/snapshot/. deploy/space/snapshot/ && cp -r backend/app/. deploy/space/app/` (also pyproject.toml/uv.lock if deps changed), then `cd deploy/space && npx --yes vercel@latest deploy --prod --yes`. Don't run `build_space.py` (it wipes the Vercel link). The deployed image has no ingest deps, so keep pypdf/pptx/yt-dlp/whisper imports lazy.
+
+**Open / optional next steps (none required):**
+1. Try notes upload in a browser with a real notes file (only unit-tested so far).
+2. Grade the 10 visual-only answers with `eval/judge.py` (free-tier Gemini quota: a few per day).
+3. Slide alignment: TF-IDF helped on MIT L1 but not L2 (dense-only 0.71 vs 0.63 transcript-only); more held-out lectures would settle it.
+4. Board crop/upscale is untested on real board footage (no board lectures in either course); an NPTEL board lecture would test it.
+5. Not built (stretch, low value for the demo): multi-user workspaces, speaker diarization, storing original Hinglish text, ingest progress percentage, .docx notes.
+6. Demo video: script at `docs/demo-script.md`; the user chose not to record it during exams.
+
+**Gotchas:** long CPU jobs (Whisper) can be killed by Claude Code's low-memory reaper when the session is idle (start it with `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1` for long runs); the Gemini free tier often returns 503/504, and `judge.py` stops at the first error on purpose; `.claude/worktrees/` holds old agent worktrees (merged; safe to delete).
+
 **Done 2026-11-27: notes upload** (`backend/app/ingestion/notes.py`, `POST /lectures/{id}/notes?filename=` raw body, max 20 MB; `GET /lectures/{id}/notes[/file]`). PDF/MD/TXT notes are split into ~150-250-word passages (per page for PDF, by heading/paragraph otherwise) and indexed synchronously in the same collection as `source: "notes"` points (`page`, start/end = null); search and answers use them, `lecture_segments` (transcript, timeline, summary, quiz) excludes them, re-indexing a lecture's transcript keeps them, and a rebuilt collection gets them back from `notes.json`. Citations show "L4 · notes p.2" and open the file at that page; "Play all cited clips" skips them. Not evaluated on real notes yet.
 
 **Done 2026-11-27: slide upload + alignment** (`backend/app/ingestion/slides.py`, `POST /lectures/{id}/slides?filename=` with the raw file as body, so the read-only deploy needs no multipart library; `GET /lectures/{id}/slides[/file]`). PDF via pypdf, PPTX via python-pptx (incl. speaker notes). Alignment: z-scored dense similarity + z-scored TF-IDF similarity, then a monotonic dynamic program (forward jump 0.25 sd, backward 1.0 sd); off-topic segments get no slide. Each segment stores `slide_page`/`slide_text`; slide text is embedded ("Slide: ..."), shown to the answering LLM and the cross-encoder; UI has Add slides, Slide N links (PDF #page=N) and slide numbers on citation chips. Upload on an indexed lecture re-aligns from the index (no transcript needed). Eval (`backend/scripts/eval_slides.py`, gold from frame reads): dev MIT 6.0001 L1 exact 0.74 / within-1 0.94 with on-screen text (0.49/0.77 transcript only); held-out L2 0.82/0.97 (0.63/0.87 transcript only; dense-only 0.71/0.87 beat dense+TF-IDF there, so the TF-IDF choice is unsettled).
@@ -412,7 +437,7 @@ Live demo: https://lecturelens-app.vercel.app (10 lectures of CampusX "100 Days 
 
 **Ablations** (`backend/scripts/ablate.py`, results in README and `eval/results/ablations-20261118-024509.md`). Done: chunk length (60 s best on every metric; 120 s drops timestamp accuracy to 0.64), embedding model (keep bge-small; base-size models are no better and 5x slower to index), classifier (topic prefix +2 questions; off-topic filter no effect on this set). Whisper size (done 2026-11-19, `eval/results/ablations-20261119-132809.md`): `medium` is no better than `small` (hybrid R@1 0.91 vs 0.93, dense 0.85 vs 0.91), so the app keeps `small` and `large-v3` is skipped. History of the run, kept for reference: Whisper `medium` re-transcription (`backend/scripts/transcribe_variant.py`, writes `transcript-medium.json` per lecture, skips lectures already done). As of 2026-11-19, lectures 1 to 4 are done; lecture 5 (about 19.5 min of audio, about 25 to 30 min to transcribe) is still to do. Measured speed on this CPU: 1.3x to 1.85x real time, about 1.4 GB of RAM. Both runs so far were stopped by Claude Code because the whole system ran low on memory while the session was idle (the 2026-11-18 run left no output; the 2026-11-19 run was stopped at about 10:13 during lecture 5). To resume, close memory-heavy apps first, then run `backend/.venv/Scripts/python -u backend/scripts/transcribe_variant.py --course 1 --model medium > eval/logs/whisper-medium.log 2>&1`. For long unattended runs, start Claude Code with `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1` so it does not stop background jobs. After lecture 5, run `ablate.py --only whisper` and add the result to the README. Then decide whether `large-v3` is worth running (estimated 4 to 6 h on CPU); run it only if `medium` clearly beats `small`.
 
-Then: demo video (script ready, recording declined for now). Slide/board reading done 2026-11-27.
+Then: nothing required; see "Resume here" above.
 Small fixes: done (error message shows the real backend URL; demo has 10 lectures).
 
 Recent results:
