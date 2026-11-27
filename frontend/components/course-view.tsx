@@ -46,6 +46,38 @@ const LAYOUT_NAME: Record<string, string> = {
   board_far: "board (far)",
 };
 
+/** Below this visual_quality_score the on-screen text is mostly left out, so say so. */
+const HARD_TO_READ = 0.5;
+
+/** Layout plus how readable its screen/board was, e.g. "screen · 97% readable". A talking head has
+ *  nothing to read, so it gets no score. */
+function VisualTag({ lecture: l }: { lecture: Lecture }) {
+  const name = LAYOUT_NAME[l.layout_type ?? ""];
+  const q = l.visual_quality_score;
+  if (l.layout_type === "facecam_only" || q == null) {
+    return (
+      <span className="text-muted" title="Layout detected from the video">
+        {name}
+      </span>
+    );
+  }
+  if (q < HARD_TO_READ) {
+    return (
+      <span
+        className="text-amber-700/80 dark:text-amber-400/80"
+        title="The writing in this video was hard to read even after cropping and upscaling, so little of it is indexed. Answers about this lecture rely on what was said."
+      >
+        {name.split(" ")[0]} hard to read
+      </span>
+    );
+  }
+  return (
+    <span className="text-muted" title="Layout detected from the video, and how confidently its text could be read">
+      {name} · {Math.round(q * 100)}% readable
+    </span>
+  );
+}
+
 /** Off-topic stretches of a lecture, for "Skip off-topic". */
 const offTopic = (t: Timeline) =>
   t.chapters.filter((c) => c.label === "off_topic").map((c) => ({ start: c.start_sec, end: c.end_sec }));
@@ -207,11 +239,7 @@ export default function CourseView() {
                   <span className="mt-0.5 flex gap-2 text-xs">
                     <span className={STATUS_STYLE[l.status]}>{l.status}</span>
                     {l.duration_sec > 0 && <span className="text-muted">{fmtTime(l.duration_sec)}</span>}
-                    {l.layout_type && LAYOUT_NAME[l.layout_type] && (
-                      <span className="text-muted" title="Layout detected from the video">
-                        {LAYOUT_NAME[l.layout_type]}
-                      </span>
-                    )}
+                    {l.layout_type && LAYOUT_NAME[l.layout_type] && <VisualTag lecture={l} />}
                   </span>
                 </button>
               </li>

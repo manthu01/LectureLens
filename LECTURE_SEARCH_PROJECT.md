@@ -47,7 +47,7 @@ Students sit through 40+ hours of lectures per subject. When exams come, they ca
 - Upload of separate slides (PDF/PPTX) and notes. (Slides done 2026-11-27; notes not.)
 
 ### Stretch
-- Back-of-class / low-quality board handling (crop + upscale).
+- [x] Back-of-class / low-quality board handling (crop + upscale). Implemented but untested on real board footage, since the demo courses have no board lectures.
 - Multilingual / Hinglish lectures (transcribe + translate).
 - Multiple users / shared class workspace.
 - "Exam mode": stitched clip playlist for a unit.
@@ -443,7 +443,7 @@ Recent results:
 - [x] Board lectures via vision model; layout detection (board layouts supported by the prompt, untested: the demo course has no board lectures)
 - [ ] Complete eval set (incl. unanswerable + visual-only); run all ablations. Partly done: the unanswerable questions exist, retrieval-mode and reranker ablations are done; the answer-quality eval is partly graded (26/55); chunking, embedding and classifier ablations are done; Whisper and on-screen-text ablations done; 10 visual-only questions added 2026-11-27; answer grading complete (55/55)
 - [ ] Deploy (live link), demo video (2 min), README with architecture diagram + results table. Partly done: deployed on Vercel and the README has a results table and an ASCII architecture sketch; still to do are the demo video and a proper diagram
-- [ ] Stretch: back-of-class handling, Hinglish. Hinglish is partly handled: Whisper translates the speech to English
+- [ ] Stretch: back-of-class handling, Hinglish. Hinglish is partly handled: Whisper translates the speech to English. Back-of-class handling done 2026-11-27 (`visual/enhance.py`): a `board_far` frame, or a screen/board frame read with readability < 0.6, is cropped to the region holding ink (NumPy: pixels far from a local blur, counted per cell, borders ignored, padded, minimum size), upscaled to 1600 px wide with Pillow LANCZOS + autocontrast + unsharp mask, and read again (crops batched 6 per call); the read with the higher readability is kept and marked `enhanced` in `reads.json`, so a rerun never retries a frame. Frames read below 0.3 add no `visual_text`, and the lecture list shows "screen · 97% readable" or flags "board hard to read" (quality < 0.5). Implemented but untested on real board footage, since the demo courses have no board lectures; on the existing screen lectures the few low-readability frames fill the screen, so no crop is made and nothing changes
 
 Rule: always keep the system working end to end; improve one stage at a time and measure.
 
@@ -453,7 +453,7 @@ Rule: always keep the system working end to end; improve one stage at a time and
 
 - Long videos: process audio in chunks; resumable pipeline with per-step status.
 - Failed downloads/transcriptions: mark lecture `failed` with reason, allow retry.
-- Unreadable visuals: low confidence → skip visual_text, flag in UI.
+- Unreadable visuals: low confidence → skip visual_text, flag in UI. Done: frames read below 0.3 add no visual_text; lectures with visual quality < 0.5 are flagged "hard to read" in the lecture list.
 - Multiple speakers (student questions): optional diarization; label student questions so answers prefer professor speech.
 - Hinglish/code-mixed audio: Whisper multilingual; store original + English text (stretch).
 - Duplicate questions/cost: cache embeddings and answers for identical queries.
