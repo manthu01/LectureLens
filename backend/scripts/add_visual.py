@@ -57,7 +57,7 @@ def main() -> int:
             session.add(lec)
             session.commit()
             with_text = sum(1 for c in chunks if c.get("visual_text"))
-            print(f"lecture {lec.number}: {layout}, quality {quality:.2f}, {with_text}/{n} segments with on-screen text")
+            print(f"lecture {lec.number}: {layout}, quality {quality if quality is None else round(quality, 2)}, {with_text}/{n} segments with on-screen text")
     return 1 if failed else 0
 
 

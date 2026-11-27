@@ -162,12 +162,12 @@ def read_frames(frames: list[dict], frame_dir: Path) -> list[dict]:
     return [{**f, **cache[f["file"]]} for f in frames]
 
 
-def lecture_layout(reads: list[dict]) -> tuple[str, float]:
+def lecture_layout(reads: list[dict]) -> tuple[str, float | None]:
     """(layout_type, visual_quality_score) for a lecture.
 
     Layout: the layout on screen for the most time (a short talking-head intro doesn't make a
     screen lecture "facecam_only", and one slide doesn't make a talking-head lecture a screen one).
-    Quality: time-weighted mean readability of the frames with content; 0 if none have any.
+    Quality: time-weighted mean readability of the frames with content; None if none have any.
     """
     def dur(r: dict) -> float:
         return max(r["end_sec"] - r["start_sec"], 1.0)
@@ -178,6 +178,6 @@ def lecture_layout(reads: list[dict]) -> tuple[str, float]:
     layout = weights.most_common(1)[0][0] if weights else "unknown"
     content = [r for r in reads if r["text"] and r["layout"] not in ("facecam_only", "unknown")]
     if not content:
-        return layout, 0.0
+        return layout, None  # nothing to read: no score, rather than a misleading 0
     quality = sum(r["readable"] * dur(r) for r in content) / sum(dur(r) for r in content)
     return layout, round(quality, 3)

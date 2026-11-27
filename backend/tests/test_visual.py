@@ -69,7 +69,7 @@ def test_lecture_layout_ignores_short_talking_head():
     assert layout == "facecam_screen"
     assert 0.5 < quality < 0.9
     assert lecture_layout([{"start_sec": 0, "end_sec": 9, "layout": "facecam_only", "text": "", "readable": 0}]) == (
-        "facecam_only", 0.0)
+        "facecam_only", None)
     # Mostly talking head with one slide: still a talking-head lecture.
     mostly_cam = [
         {"start_sec": 0, "end_sec": 500, "layout": "facecam_only", "text": "", "readable": 0},
